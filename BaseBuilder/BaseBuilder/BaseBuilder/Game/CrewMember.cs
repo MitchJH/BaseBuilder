@@ -104,6 +104,12 @@ namespace BaseBuilder
             return false;
         }
 
+        public bool DeterminePath()
+        {
+            return true;
+
+        }
+
         public bool Update(GameTime gameTime)
         {
             Move(gameTime);

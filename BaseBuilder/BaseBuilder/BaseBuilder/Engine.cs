@@ -24,9 +24,6 @@ namespace BaseBuilder
 
         //A test list of crew members.
         List<CrewMember> crew_members;
-        
-        
-
 
         Point startTile = Point.Zero;
         Point endTile = Point.Zero;
@@ -34,10 +31,7 @@ namespace BaseBuilder
         List<Vector2> curve = new List<Vector2>();
         float frameRate;
 
-        Texture2D back;
-        Texture2D front;
-        Texture2D left;
-        Texture2D right;
+        Texture2D default_texture;
 
         public Engine()
         {
@@ -48,8 +42,6 @@ namespace BaseBuilder
 
             int screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             int screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-
-            
 
 #if DEBUG
             double windowScale = 0.8;
@@ -87,10 +79,7 @@ namespace BaseBuilder
             Sprites.MISSING_TEXTURE = Content.Load<Texture2D>("Textures/missing");
             Sprites.PIXEL = Content.Load<Texture2D>("Textures/pixel");
 
-            back = Content.Load<Texture2D>("Textures/p_back");
-            front = Content.Load<Texture2D>("Textures/p_front");
-            left = Content.Load<Texture2D>("Textures/p_left");
-            right = Content.Load<Texture2D>("Textures/p_right");
+            default_texture = Content.Load<Texture2D>("Textures/p_front");
         }
 
         protected override void UnloadContent()
@@ -126,18 +115,26 @@ namespace BaseBuilder
                 {
                     foreach (CrewMember c in crew_members)
                     {
-                        //Clear selection at the beginning of a mouse click.
-                        c.Selected = false;
+                        
                         //If the mouseposition is within the textures bounds of a crew member...
                         //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
-                        if (mousePosition.X > c.Position.X - (front.Bounds.Width / 2) && mousePosition.X < c.Position.X + (front.Bounds.Width / 2))
+                        if (mousePosition.X > c.Position.X - (default_texture.Bounds.Width / 2) && mousePosition.X < c.Position.X + (default_texture.Bounds.Width / 2))
                         {
-                            if (mousePosition.Y > c.Position.Y - (front.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (front.Bounds.Height / 2))
+                            if (mousePosition.Y > c.Position.Y - (default_texture.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (default_texture.Bounds.Height / 2))
                             {
-                                //they are selected. 
+                                //deselect any crew that are already selected.
+                                foreach (CrewMember cm in crew_members)
+                                {
+                                    if (cm.Selected)
+                                    {
+                                        cm.Selected = false;
+                                    }
+                                }
+
                                 //TODO: Some more formal UI class will need to handle when things are selected, not the object itself.
                                 c.Selected = true;
                                 Console.WriteLine(c.Name + " " + " has been selected");
+                                
                                 break;
                             }
                         }
@@ -272,7 +269,7 @@ namespace BaseBuilder
             Rectangle re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
 
             //temporary crew member.
-            spriteBatch.Draw(front, re, Color.White);
+            spriteBatch.Draw(default_texture, re, Color.White);
 
             //Draw every crew members sprite.
             for (int i = 0; i < crew_members.Count; i++)
@@ -280,8 +277,8 @@ namespace BaseBuilder
                 p = new Vector2(crew_members[i].Position.X, crew_members[i].Position.Y);
                 
                 //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
-                re = new Rectangle((int)p.X - (front.Width / 2), (int)p.Y - (front.Height / 2), 64, 64);
-                spriteBatch.Draw(front, re, Color.White);
+                re = new Rectangle((int)p.X - (default_texture.Width / 2), (int)p.Y - (default_texture.Height / 2), 64, 64);
+                spriteBatch.Draw(default_texture, re, Color.White);
 
                 //If a crew member is selected then draw a circle around them.
                 if (crew_members[i].Selected)
