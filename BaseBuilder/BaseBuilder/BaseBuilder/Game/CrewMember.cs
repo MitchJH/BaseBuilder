@@ -10,17 +10,26 @@ namespace BaseBuilder
 {
     public class CrewMember : Entity
     {
+     
+
         private string _name;
         private int _age;
+        private float _walk_speed;
+        private float _run_speed;
+
         private Country _country;
 
         private Needs _needs;
         private Stats _stats;
         private List<Trait> _traits;
 
+        private Texture2D _sprite;
+
+
         public CrewMember()
             : base()
         {
+
             _name = "NO_NAME";
             _age = 0;
             _country = new Country();
@@ -39,7 +48,40 @@ namespace BaseBuilder
             _stats.Agriculture = 0;
             _stats.Medicine = 0;
 
+            _walk_speed = 60;
+            _run_speed = 100;
+
             _traits = new List<Trait>();
+
+            
+            this.Destination = this.Position;
+        }
+
+        public CrewMember(string name, int age, float posX, float posY)
+            : base()
+        {
+            _name = name;
+            _age = age;
+            _country = new Country();
+            _country.Name = "England";
+            _country.Demonym = "English";
+            _country.Flag = "England_Flag";
+
+            _needs.Health = 100;
+            _needs.Energy = 100;
+            _needs.Hunger = 100;
+            _needs.Thirst = 100;
+            _needs.Stress = 100;
+
+            _stats.Fitness = 0;
+            _stats.Engineering = 0;
+            _stats.Agriculture = 0;
+            _stats.Medicine = 0;
+
+
+            _traits = new List<Trait>();
+
+            Position = new Vector2(posX, posY);
             this.Destination = this.Position;
         }
 
@@ -58,6 +100,20 @@ namespace BaseBuilder
                 }
             }
             return false;
+        }
+
+        public bool Update(GameTime gameTime)
+        {
+            Move(gameTime);
+
+
+
+            return true;
+        }
+
+        public bool Draw()
+        {
+            return true;
         }
 
         public string Name
@@ -94,6 +150,12 @@ namespace BaseBuilder
         {
             get { return _traits; }
             set { _traits = value; }
+        }
+
+        public Texture2D Sprite
+        {
+            get { return _sprite; }
+            set { _sprite = value; }
         }
     }
 

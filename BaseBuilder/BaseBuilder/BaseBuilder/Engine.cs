@@ -22,6 +22,12 @@ namespace BaseBuilder
 
         CrewMember crew = new CrewMember();
 
+        //A test list of crew members.
+        List<CrewMember> crew_members;
+        
+        
+
+
         Point startTile = Point.Zero;
         Point endTile = Point.Zero;
         LinkedList<Tile> path = new LinkedList<Tile>();
@@ -43,6 +49,8 @@ namespace BaseBuilder
             int screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             int screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
 
+            
+
 #if DEBUG
             double windowScale = 0.8;
             this.graphics.PreferredBackBufferWidth = (int)(screenWidth * windowScale);
@@ -62,8 +70,14 @@ namespace BaseBuilder
             Camera.Create(GraphicsDevice.Viewport);
             WORLD = new World();
 
-            crew.Position = Vector2.Zero;
-            
+            //Initialzing crew members.
+            crew_members = new List<CrewMember>();
+            //This should be loaded in from Save File. Hardcoded for now.
+            crew_members.Add(new CrewMember("James", 23, 240, 350));
+            crew_members.Add(new CrewMember("John", 25, 250, 160));
+            crew_members.Add(new CrewMember("Joe", 33, 650, 300));
+            crew_members.Add(new CrewMember("Jim", 27, 480, 100));
+
             base.Initialize();
         }
 
@@ -154,7 +168,7 @@ namespace BaseBuilder
             {
                 if (path.Count > 0)
                 {
-                    bool arrived = crew.Move(gameTime);
+                    bool arrived = crew.Update(gameTime);
 
                     if (arrived)
                     {
@@ -231,6 +245,19 @@ namespace BaseBuilder
                 }
             }
 
+            Vector2 p = new Vector2(crew.Position.X, crew.Position.Y);
+            Rectangle re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
+
+            //temporary crew member.
+            spriteBatch.Draw(front, re, Color.White);
+
+            
+            for (int i = 0; i < crew_members.Count; i++)
+            {
+                p = new Vector2(crew_members[i].Position.X, crew_members[i].Position.Y);
+                re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
+                spriteBatch.Draw(front, re, Color.White);
+            }
 
             if (startTile != Point.Zero)
             {
@@ -249,29 +276,7 @@ namespace BaseBuilder
                 spriteBatch.FillRectangle(tileRectangle, Color.Red);
             }
 
-            Vector2 p = new Vector2(crew.Position.X - (Constants.TILE_SIZE / 2), crew.Position.Y - (Constants.TILE_SIZE / 2));
-            //spriteBatch.DrawCircle(p, 5, 20, Color.Purple);
-
-            Facing face = crew.Facing;
-
-            Rectangle re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
-
-            if (face == Facing.Back)
-            {
-                spriteBatch.Draw(back, re, Color.White);
-            }
-            else if (face == Facing.Left)
-            {
-                spriteBatch.Draw(left, re, Color.White);
-            }
-            else if (face == Facing.Right)
-            {
-                spriteBatch.Draw(right, re, Color.White);
-            }
-            else
-            {
-                spriteBatch.Draw(front, re, Color.White);
-            }
+            
 
             spriteBatch.End();
 
