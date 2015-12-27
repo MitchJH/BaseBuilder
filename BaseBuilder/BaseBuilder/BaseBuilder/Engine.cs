@@ -73,7 +73,7 @@ namespace BaseBuilder
             //Initialzing crew members.
             crew_members = new List<CrewMember>();
             //This should be loaded in from Save File. Hardcoded for now.
-            crew_members.Add(new CrewMember("James", 23, 240, 350));
+            crew_members.Add(new CrewMember("James", 23, 0, 0));
             crew_members.Add(new CrewMember("John", 25, 250, 160));
             crew_members.Add(new CrewMember("Joe", 33, 650, 300));
             crew_members.Add(new CrewMember("Jim", 27, 480, 100));
@@ -124,6 +124,25 @@ namespace BaseBuilder
                 // Check for a left mouse click
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                 {
+                    foreach (CrewMember c in crew_members)
+                    {
+                        //Clear selection at the beginning of a mouse click.
+                        c.Selected = false;
+                        //If the mouseposition is within the textures bounds of a crew member...
+                        //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
+                        if (mousePosition.X > c.Position.X - (front.Bounds.Width / 2) && mousePosition.X < c.Position.X + (front.Bounds.Width / 2))
+                        {
+                            if (mousePosition.Y > c.Position.Y - (front.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (front.Bounds.Height / 2))
+                            {
+                                //they are selected. 
+                                //TODO: Some more formal UI class will need to handle when things are selected, not the object itself.
+                                c.Selected = true;
+                                Console.WriteLine(c.Name + " " + " has been selected");
+                                break;
+                            }
+                        }
+                    }
+
                     if (path.Count > 0)
                     {
                         path.Clear();
@@ -241,6 +260,8 @@ namespace BaseBuilder
                     }
                 }
 
+                
+
                 foreach (Vector2 v in curve)
                 {
                     spriteBatch.DrawCircle(v, 3, 20, Color.Red);
@@ -253,12 +274,20 @@ namespace BaseBuilder
             //temporary crew member.
             spriteBatch.Draw(front, re, Color.White);
 
-            
+            //Draw every crew members sprite.
             for (int i = 0; i < crew_members.Count; i++)
             {
                 p = new Vector2(crew_members[i].Position.X, crew_members[i].Position.Y);
-                re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
+                
+                //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
+                re = new Rectangle((int)p.X - (front.Width / 2), (int)p.Y - (front.Height / 2), 64, 64);
                 spriteBatch.Draw(front, re, Color.White);
+
+                //If a crew member is selected then draw a circle around them.
+                if (crew_members[i].Selected)
+                {
+                    spriteBatch.DrawCircle(crew_members[i].Position, 32, 20, Color.LightGreen);
+                }
             }
 
             if (startTile != Point.Zero)

@@ -24,7 +24,7 @@ namespace BaseBuilder
         private List<Trait> _traits;
 
         private Texture2D _sprite;
-
+        private bool _selected;
 
         public CrewMember()
             : base()
@@ -52,7 +52,7 @@ namespace BaseBuilder
             _run_speed = 100;
 
             _traits = new List<Trait>();
-
+            _selected = false;
             
             this.Destination = this.Position;
         }
@@ -78,6 +78,8 @@ namespace BaseBuilder
             _stats.Agriculture = 0;
             _stats.Medicine = 0;
 
+            _walk_speed = 60;
+            _run_speed = 100;
 
             _traits = new List<Trait>();
 
@@ -156,6 +158,12 @@ namespace BaseBuilder
         {
             get { return _sprite; }
             set { _sprite = value; }
+        }
+
+        public bool Selected
+        {
+            get { return _selected; }
+            set { _selected = value; }
         }
     }
 
