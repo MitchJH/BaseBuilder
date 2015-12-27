@@ -102,6 +102,7 @@ namespace BaseBuilder
         {
             Controls.Update();
             Camera.Update(gameTime);
+            WORLD.Clock.Update(gameTime, ClockSpeed.RealTime);
 
             if (Controls.Mouse.IsInCameraView()) // Don't do anything with the mouse if it's not in our cameras viewport.
             {
@@ -117,7 +118,8 @@ namespace BaseBuilder
                     "(Mouse: " + (int)mousePosition.X + ":" + (int)mousePosition.Y + ") " +
                     "(Tile: " + x + ":" + y + ") " +
                     "(Camera: Position:" + Camera.Position + " - Zoom:" + Camera.Zoom + ") " +
-                    "(FPS: " + frameRate + ")";
+                    "(FPS: " + frameRate.ToString("N0") + ") " +
+                    "(" + WORLD.Clock.DebugText + ")";
                 
                 // Check for a left mouse click
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
