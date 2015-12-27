@@ -17,7 +17,7 @@ namespace BaseBuilder
 
         // CAMERA
         // Zoom
-        public const float CAMERA_ZOOM_SPEED = 4.0f;
+        public const float CAMERA_ZOOM_SPEED = 5.0f;
         public const float CAMERA_ZOOM_INERTIA = 0.1f;
         public const float CAMERA_MAX_ZOOM_IN = 1.5f;
         public const float CAMERA_MAX_ZOOM_OUT = 0.2f;
