@@ -10,6 +10,9 @@ namespace BaseBuilder
 {
     public static class Constants
     {
+        // GAME
+        public const string APP_DATA_GAME_NAME = "Mars Game";
+
         // TILE MAP
         public const int TILE_SIZE = 32;
         public const int MAP_WIDTH = 100;

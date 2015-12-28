@@ -20,56 +20,82 @@ namespace BaseBuilder
         SpriteBatch spriteBatch;
         World WORLD;
 
-        CrewMember crew = new CrewMember();
+        // TODO: Move FPS/performances counters to own class
+        float frameRate;
 
-        //A test list of crew members.
+        // ############################################# //
+        // ######## EVERYTHING HERE NEEDS TO GO ######## //
+        // ############################################# //
+        CrewMember crew = new CrewMember();
         List<CrewMember> crew_members;
 
         Point startTile = Point.Zero;
         Point endTile = Point.Zero;
         LinkedList<Tile> path = new LinkedList<Tile>();
         List<Vector2> curve = new List<Vector2>();
-        float frameRate;
+        // ############################################# //
+        // ############################################# //
 
-        Texture2D default_texture;
         bool active_selection = false;
 
         public Engine()
         {
             graphics = new GraphicsDeviceManager(this);
-
-            this.IsMouseVisible = true;
-            this.IsFixedTimeStep = false;
-
-            int screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            int screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-
-#if DEBUG
-            double windowScale = 0.8;
-            this.graphics.PreferredBackBufferWidth = (int)(screenWidth * windowScale);
-            this.graphics.PreferredBackBufferHeight = (int)(screenHeight * windowScale);
-#else
-            this.graphics.IsFullScreen = true;
-            this.graphics.PreferredBackBufferWidth = screenWidth;
-            this.graphics.PreferredBackBufferHeight = screenHeight;
-#endif
-
             Content.RootDirectory = "Content";
         }
-        
+
         protected override void Initialize()
         {
+            // Load the settings file
+            Settings.Load();
+
+            // Set mouse visibility and fixed timestep
+            this.IsMouseVisible = Settings.IsMouseVisible;
+            this.IsFixedTimeStep = Settings.IsFixedTimestep;
+
+            // Set the resolution
+            this.graphics.PreferredBackBufferWidth = Settings.X_resolution;
+            this.graphics.PreferredBackBufferHeight = Settings.Y_resolution;
+
+            // Adjust window mode
+            if (Settings.WindowMode == WindowMode.Fullscreen)
+            {
+                this.graphics.IsFullScreen = true;
+            }
+            else
+            {
+                // Set the position of the window
+                var form = System.Windows.Forms.Control.FromHandle(this.Window.Handle).FindForm();
+                form.Location = new System.Drawing.Point(Settings.X_windowPos, Settings.Y_windowPos);
+
+                // Set the size of the window
+                form.Size = new System.Drawing.Size(Settings.Window_Width, Settings.Window_Height);
+
+                if (Settings.WindowMode == WindowMode.Borderless)
+                {
+                    // Make the form borderless
+                    form.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                    form.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+                }
+            }
+        
+            // Load the localization file
             Localization.LoadLocalization();
+
+            // Create the camera
             Camera.Create(GraphicsDevice.Viewport);
+
+            // Create a new world object
             WORLD = new World();
 
             //Initialzing crew members.
             crew_members = new List<CrewMember>();
             //This should be loaded in from Save File. Hardcoded for now.
-            crew_members.Add(new CrewMember("James", 23, 0, 0));
-            crew_members.Add(new CrewMember("John", 25, 250, 160));
-            crew_members.Add(new CrewMember("Joe", 33, 650, 300));
-            crew_members.Add(new CrewMember("Jim", 27, 480, 100));
+            crew_members.Add(new CrewMember("James", 23, 0, 0, "crew"));
+            crew_members.Add(new CrewMember("John", 25, 250, 160, "crew"));
+            crew_members.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
+            crew_members.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
+
 
             base.Initialize();
         }
@@ -77,10 +103,14 @@ namespace BaseBuilder
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // Load the base textures
             Sprites.MISSING_TEXTURE = Content.Load<Texture2D>("Textures/missing");
             Sprites.PIXEL = Content.Load<Texture2D>("Textures/pixel");
-
-            default_texture = Content.Load<Texture2D>("Textures/p_front");
+            // Load all game sprites
+            Sprites.LoadSpriteBank("Content/Data/spritebank.txt", Content);
+            // Load all sound effects
+            Audio.LoadSoundBank("Content/Data/soundbank.txt", Content);
         }
 
         protected override void UnloadContent()
@@ -116,9 +146,8 @@ namespace BaseBuilder
                 {
                     c.Update(gameTime);
                 }
-                
 
-                // Check for a left mouse click
+
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                 {
                     foreach (CrewMember c in crew_members)
@@ -146,9 +175,9 @@ namespace BaseBuilder
                             }
                         }
                     }
-
                 }
-                else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.MouseOld.RightButton == ButtonState.Released && Controls.Keyboard.IsKeyDown(Keys.LeftControl))
+
+                else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.Keyboard.IsKeyDown(Keys.LeftControl))
                 {
                     if ((x < 0 || y < 0 || x >= Constants.MAP_WIDTH || y >= Constants.MAP_HEIGHT) == false)
                     {
@@ -167,16 +196,15 @@ namespace BaseBuilder
                                 Point destination = new Point(x, y);
                                 Console.WriteLine("Generating Path from point (" + start_location.X + "," + start_location.Y + ") to point (" + destination.X + "," + destination.Y + ")");
                                 cm.DeterminePath(WORLD.FindPath(start_location, destination));
-
                             }
                         }
                     }
                 }
             }
-            
+
 
             // Check for exit.
-            if (Controls.Keyboard.IsKeyDown(Keys.Escape))
+            if(Controls.Keyboard.IsKeyDown(Keys.Escape))
             {
                 Exit();
             }
@@ -245,21 +273,21 @@ namespace BaseBuilder
             Rectangle re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
 
             //temporary crew member.
-            spriteBatch.Draw(default_texture, re, Color.White);
+            spriteBatch.Draw(Sprites.Get(crew.Sprite), re, Color.White);
 
             //Draw every crew members sprite.
-            for (int i = 0; i < crew_members.Count; i++)
+            foreach(CrewMember crew_member in crew_members)
             {
-                p = new Vector2(crew_members[i].Position.X, crew_members[i].Position.Y);
+                p = new Vector2(crew_member.Position.X, crew_member.Position.Y);
                 
                 //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
-                re = new Rectangle((int)p.X - (default_texture.Width / 2), (int)p.Y - (default_texture.Height / 2), 64, 64);
-                spriteBatch.Draw(default_texture, re, Color.White);
+                re = new Rectangle((int)p.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)p.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
+                spriteBatch.Draw(Sprites.Get(crew_member.Sprite), re, Color.White);
 
                 //If a crew member is selected then draw a circle around them.
-                if (crew_members[i].Selected)
+                if (crew_member.Selected)
                 {
-                    spriteBatch.DrawCircle(crew_members[i].Position, 32, 20, Color.LightGreen);
+                    spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen);
                 }
             }
 

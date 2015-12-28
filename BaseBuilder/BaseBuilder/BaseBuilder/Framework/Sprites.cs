@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace BaseBuilder
 {
@@ -13,11 +15,11 @@ namespace BaseBuilder
         private static Texture2D _MISSING_TEXTURE;
         private static Texture2D _PIXEL;
 
-        private static Dictionary<string, List<Texture2D>> _sprites;
+        private static Dictionary<string, Texture2D> _sprites;
 
         static Sprites()
         {
-            _sprites = new Dictionary<string, List<Texture2D>>();
+            _sprites = new Dictionary<string, Texture2D>();
 
             /* SPLITTING A SPRITESHEET
             int tile_size = 64;
@@ -39,30 +41,39 @@ namespace BaseBuilder
             */
         }
 
-        public static Texture2D Get(string key, int frame)
+        public static void LoadSpriteBank(string file, ContentManager content)
         {
-            if (string.IsNullOrEmpty(key) || frame < 0)
+            using (var stream = TitleContainer.OpenStream(file))
             {
-                return _MISSING_TEXTURE;
+                using (var reader = new StreamReader(stream))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (line.StartsWith("#") == false)
+                        {
+                            string[] split = line.Split(',');
+                            string id = split[0];
+                            string filepath = split[1];
+
+                            Texture2D newTexture = content.Load<Texture2D>(filepath);
+                            _sprites.Add(id, newTexture);
+                        }
+                    }
+                }
             }
-            else
+        }
+
+        public static Texture2D Get(string key)
+        {
+            if (string.IsNullOrEmpty(key) == false)
             {
                 if (_sprites.ContainsKey(key))
                 {
-                    if (frame < _sprites[key].Count)
-                    {
-                        return _sprites[key][frame];
-                    }
-                    else
-                    {
-                        return _MISSING_TEXTURE;
-                    }
-                }
-                else
-                {
-                    return _MISSING_TEXTURE;
+                    return _sprites[key];
                 }
             }
+            return _MISSING_TEXTURE;
         }
 
         public static Texture2D MISSING_TEXTURE
