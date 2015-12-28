@@ -20,6 +20,7 @@ namespace BaseBuilder
         private static int _Y_windowPos;
         private static bool _mouseVisible;
         private static bool _fixedTimestep;
+        private static bool _mouseScrolling;
 
         static Settings()
         {
@@ -34,6 +35,7 @@ namespace BaseBuilder
             _Y_windowPos = 0;
             _mouseVisible = true;
             _fixedTimestep = false;
+            _mouseScrolling = true;
         }
 
         public static void Load()
@@ -88,6 +90,10 @@ namespace BaseBuilder
                             else if (line.StartsWith("fixed_timestep"))
                             {
                                 _fixedTimestep = bool.Parse(value);
+                            }
+                            else if (line.StartsWith("mouse_scrolling"))
+                            {
+                                _mouseScrolling = bool.Parse(value);
                             }
                         }
                     }
@@ -151,6 +157,12 @@ namespace BaseBuilder
         {
             get { return Settings._fixedTimestep; }
             set { Settings._fixedTimestep = value; }
+        }
+
+        public static bool MouseScrolling
+        {
+            get { return Settings._mouseScrolling; }
+            set { Settings._mouseScrolling = value; }
         }
     }
 

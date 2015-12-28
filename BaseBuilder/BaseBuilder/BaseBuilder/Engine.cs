@@ -40,10 +40,7 @@ namespace BaseBuilder
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-        }
 
-        protected override void Initialize()
-        {
             // Load the settings file
             Settings.Load();
 
@@ -76,7 +73,10 @@ namespace BaseBuilder
                     form.WindowState = System.Windows.Forms.FormWindowState.Maximized;
                 }
             }
-        
+        }
+
+        protected override void Initialize()
+        {        
             // Load the localization file
             Localization.LoadLocalization();
 
