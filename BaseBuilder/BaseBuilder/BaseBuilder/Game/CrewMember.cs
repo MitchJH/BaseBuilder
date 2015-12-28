@@ -29,6 +29,7 @@ namespace BaseBuilder
         Point _startTile = Point.Zero;
         Point _endTile = Point.Zero;
         LinkedList<Tile> _path = new LinkedList<Tile>();
+        List<Vector2> _path_waypoints = new List<Vector2>();
 
         public CrewMember()
             : base()
@@ -102,15 +103,20 @@ namespace BaseBuilder
 
         public bool Move(GameTime gameTime)
         {
-            if (this.Destination != this.Position)
+            //If there are currently waypoints determined, the crew member will start moving to the next waypoint.
+            //The waypoint they move to is always at index 0 in the list.
+            if (_path_waypoints.Count > 0)
             {
-                Vector2 direction = Vector2.Normalize(this.Destination - this.Position);
+                Vector2 direction = Vector2.Normalize(_path_waypoints[0] - this.Position);
                 this.Position += direction * (float)gameTime.ElapsedGameTime.TotalSeconds * _walk_speed;
 
-                if (Vector2.Distance(this.Position, this.Destination) < 1)
+                //Once a waypoint has been reached, remove it from the list.
+                //This
+                if (Vector2.Distance(this.Position, _path_waypoints[0]) < 1)
                 {
-                    //direction = Vector2.Zero;
-                    this.Destination = this.Position;
+                    _path_waypoints[0] = this.Position;
+                    _path_waypoints.RemoveAt(0);
+                    
                     return true;
                 }
             }
@@ -122,6 +128,10 @@ namespace BaseBuilder
                     _waypoint++;
                     
                     Destination = new Vector2(_path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, _path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
+
+                    _path_waypoints.Add(new Vector2(Destination.X + (Constants.TILE_SIZE / 2), Destination.Y + (Constants.TILE_SIZE / 2)));
+
+                    Console.WriteLine("added ("+ Destination.X + "," + Destination.Y + ") to the route.");
                 }
             }
 
@@ -135,6 +145,7 @@ namespace BaseBuilder
             Point start_location = new Point((int)Position.X / Constants.TILE_SIZE, (int)Position.Y / Constants.TILE_SIZE);
             _path = path;
 
+            _path_waypoints.Clear();
             if (_path == null)
             {
                 Console.WriteLine("No path found, resetting tiles.");
@@ -147,15 +158,12 @@ namespace BaseBuilder
             else
             {
                 Console.WriteLine(" 'On my way!' ");
-                Position = new Vector2(start_location.X * Constants.TILE_SIZE, start_location.Y * Constants.TILE_SIZE);
-               
                 Audio.Play("high_double_beep");
                
                 _waypoint = 0;
                 Destination = new Vector2(path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
                 
                 _startTile = start_location;
-                
 
             }
 
