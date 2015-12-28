@@ -66,6 +66,8 @@
     <Reference Include="Microsoft.Xna.Framework.GamerServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -79,6 +81,7 @@
     <Compile Include="Framework\Pathfinding\PriorityQueue.cs" />
     <Compile Include="Framework\Pathfinding\SpatialAStar.cs" />
     <Compile Include="Framework\Primitives2D.cs" />
+    <Compile Include="Framework\Settings.cs" />
     <Compile Include="Game\Entity.cs" />
     <Compile Include="Game\CrewMember.cs" />
     <Compile Include="Framework\Camera.cs" />

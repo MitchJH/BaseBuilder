@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -21,44 +20,70 @@ namespace BaseBuilder
         SpriteBatch spriteBatch;
         World WORLD;
 
-        CrewMember crew = new CrewMember();
+        // TODO: Move FPS/performances counters to own class
+        float frameRate;
 
-        //A test list of crew members.
+        // ############################################# //
+        // ######## EVERYTHING HERE NEEDS TO GO ######## //
+        // ############################################# //
+        CrewMember crew = new CrewMember();
         List<CrewMember> crew_members;
 
         Point startTile = Point.Zero;
         Point endTile = Point.Zero;
         LinkedList<Tile> path = new LinkedList<Tile>();
         List<Vector2> curve = new List<Vector2>();
-        float frameRate;
+        // ############################################# //
+        // ############################################# //
 
         public Engine()
         {
             graphics = new GraphicsDeviceManager(this);
-
-            this.IsMouseVisible = true;
-            this.IsFixedTimeStep = false;
-
-            int screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            int screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-
-#if DEBUG
-            double windowScale = 0.8;
-            this.graphics.PreferredBackBufferWidth = (int)(screenWidth * windowScale);
-            this.graphics.PreferredBackBufferHeight = (int)(screenHeight * windowScale);
-#else
-            this.graphics.IsFullScreen = true;
-            this.graphics.PreferredBackBufferWidth = screenWidth;
-            this.graphics.PreferredBackBufferHeight = screenHeight;
-#endif
-
             Content.RootDirectory = "Content";
         }
         
         protected override void Initialize()
         {
+            // Load the settings file
+            Settings.Load();
+
+            // Set mouse visibility and fixed timestep
+            this.IsMouseVisible = Settings.IsMouseVisible;
+            this.IsFixedTimeStep = Settings.IsFixedTimestep;
+
+            // Set the resolution
+            this.graphics.PreferredBackBufferWidth = Settings.X_resolution;
+            this.graphics.PreferredBackBufferHeight = Settings.Y_resolution;
+
+            // Adjust window mode
+            if (Settings.WindowMode == WindowMode.Fullscreen)
+            {
+                this.graphics.IsFullScreen = true;
+            }
+            else
+            {
+                // Set the position of the window
+                var form = System.Windows.Forms.Control.FromHandle(this.Window.Handle).FindForm();
+                form.Location = new System.Drawing.Point(Settings.X_windowPos, Settings.Y_windowPos);
+
+                // Set the size of the window
+                form.Size = new System.Drawing.Size(Settings.Window_Width, Settings.Window_Height);
+
+                if (Settings.WindowMode == WindowMode.Borderless)
+                {
+                    // Make the form borderless
+                    form.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                    form.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+                }
+            }
+
+            // Load the localization file
             Localization.LoadLocalization();
+
+            // Create the camera
             Camera.Create(GraphicsDevice.Viewport);
+
+            // Create a new world object
             WORLD = new World();
 
             //Initialzing crew members.
@@ -75,9 +100,13 @@ namespace BaseBuilder
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // Load the base textures
             Sprites.MISSING_TEXTURE = Content.Load<Texture2D>("Textures/missing");
             Sprites.PIXEL = Content.Load<Texture2D>("Textures/pixel");
+            // Load all game sprites
             Sprites.LoadSpriteBank("Content/Data/spritebank.txt", Content);
+            // Load all sound effects
             Audio.LoadSoundBank("Content/Data/soundbank.txt", Content);
         }
 
