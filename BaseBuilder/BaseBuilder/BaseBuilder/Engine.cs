@@ -89,10 +89,11 @@ namespace BaseBuilder
             //Initialzing crew members.
             crew_members = new List<CrewMember>();
             //This should be loaded in from Save File. Hardcoded for now.
-            crew_members.Add(new CrewMember("James", 23, 0, 0, "crew"));
+            crew_members.Add(new CrewMember("James", 23, 50, 20, "crew"));
             crew_members.Add(new CrewMember("John", 25, 250, 160, "crew"));
             crew_members.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
             crew_members.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
+            crew_members.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
 
 
             base.Initialize();
@@ -167,6 +168,8 @@ namespace BaseBuilder
                                 //TODO: Some more formal UI class will need to handle when things are selected, not the object itself.
                                 c.Selected = true;
                                 active_selection = true;
+
+                                Audio.Play("high_beep");
                                 Console.WriteLine(c.Name + " " + " has been selected");
 
                                 break;
