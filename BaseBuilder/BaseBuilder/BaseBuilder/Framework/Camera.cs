@@ -84,6 +84,18 @@ namespace BaseBuilder
 
             _zoom = MathHelper.Lerp(_zoom, _zoomTarget, Constants.CAMERA_ZOOM_INERTIA);
 
+            // Check for mouse dragging scrolling
+            if (Controls.Mouse.MiddleButton == ButtonState.Pressed && Controls.MouseOld.MiddleButton == ButtonState.Pressed)
+            {
+                // TODO: Add intertia to mouse dragging camera movement
+                float x_dif = Controls.Mouse.X - Controls.MouseOld.X;
+                float y_dif = Controls.Mouse.Y - Controls.MouseOld.Y;
+                _position += new Vector2(-(x_dif), -(y_dif));
+                _target = _position;
+                // We return here as we don't want other scrolling getting in the way
+                return;
+            }
+
             // Check the mouse is against the edge of the screen
             if (Settings.MouseScrolling)
             {
@@ -104,21 +116,21 @@ namespace BaseBuilder
                     _target.Y += scrollSpeed;
                 }
             }
-            
+                        
             // Check for keyboard scrolling
-            if (Controls.Keyboard.IsKeyDown(Keys.A))
+            if (Controls.Keyboard.IsKeyDown(Keys.A) || Controls.Keyboard.IsKeyDown(Keys.Left) || Controls.Keyboard.IsKeyDown(Keys.NumPad4))
             {
                 _target.X -= scrollSpeed;
             }
-            if (Controls.Keyboard.IsKeyDown(Keys.D))
+            if (Controls.Keyboard.IsKeyDown(Keys.D) || Controls.Keyboard.IsKeyDown(Keys.Right) || Controls.Keyboard.IsKeyDown(Keys.NumPad6))
             {
                 _target.X += scrollSpeed;
             }
-            if (Controls.Keyboard.IsKeyDown(Keys.W))
+            if (Controls.Keyboard.IsKeyDown(Keys.W) || Controls.Keyboard.IsKeyDown(Keys.Up) || Controls.Keyboard.IsKeyDown(Keys.NumPad8))
             {
                 _target.Y -= scrollSpeed;
             }
-            if (Controls.Keyboard.IsKeyDown(Keys.S))
+            if (Controls.Keyboard.IsKeyDown(Keys.S) || Controls.Keyboard.IsKeyDown(Keys.Down) || Controls.Keyboard.IsKeyDown(Keys.NumPad2))
             {
                 _target.Y += scrollSpeed;
             }

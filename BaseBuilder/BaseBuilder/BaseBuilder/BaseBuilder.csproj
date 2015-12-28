@@ -18,6 +18,7 @@
     <XnaOutputType>Game</XnaOutputType>
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -30,14 +31,13 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\x86\Debug</OutputPath>
     <DefineConstants>DEBUG;TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -78,8 +78,10 @@
     <Compile Include="Framework\Clock.cs" />
     <Compile Include="Framework\Controls.cs" />
     <Compile Include="Framework\Constants.cs" />
+    <Compile Include="Framework\Fonts.cs" />
     <Compile Include="Framework\Pathfinding\PriorityQueue.cs" />
     <Compile Include="Framework\Pathfinding\SpatialAStar.cs" />
+    <Compile Include="Framework\FrameRateCounter.cs" />
     <Compile Include="Framework\Primitives2D.cs" />
     <Compile Include="Framework\Settings.cs" />
     <Compile Include="Game\Entity.cs" />

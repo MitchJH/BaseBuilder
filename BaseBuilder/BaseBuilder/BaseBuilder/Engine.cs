@@ -20,9 +20,6 @@ namespace BaseBuilder
         SpriteBatch spriteBatch;
         World WORLD;
 
-        // TODO: Move FPS/performances counters to own class
-        float frameRate;
-
         // ############################################# //
         // ######## EVERYTHING HERE NEEDS TO GO ######## //
         // ############################################# //
@@ -76,7 +73,7 @@ namespace BaseBuilder
         }
 
         protected override void Initialize()
-        {        
+        {
             // Load the localization file
             Localization.LoadLocalization();
 
@@ -95,7 +92,6 @@ namespace BaseBuilder
             crew_members.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
             crew_members.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
 
-
             base.Initialize();
         }
 
@@ -106,10 +102,18 @@ namespace BaseBuilder
             // Load the base textures
             Sprites.MISSING_TEXTURE = Content.Load<Texture2D>("Textures/missing");
             Sprites.PIXEL = Content.Load<Texture2D>("Textures/pixel");
+
+            // Load all fonts
+            Fonts.LoadFontBank("Content/Data/fontbank.txt", Content);
+
             // Load all game sprites
             Sprites.LoadSpriteBank("Content/Data/spritebank.txt", Content);
+
             // Load all sound effects
             Audio.LoadSoundBank("Content/Data/soundbank.txt", Content);
+
+            // Enable the FPS counter
+            FrameRateCounter.Enable();
         }
 
         protected override void UnloadContent()
@@ -137,7 +141,6 @@ namespace BaseBuilder
                     "(Mouse: " + (int)mousePosition.X + ":" + (int)mousePosition.Y + ") " +
                     "(Tile: " + x + ":" + y + ") " +
                     "(Camera: Position:" + Camera.Position + " - Zoom:" + Camera.Zoom + ") " +
-                    "(FPS: " + frameRate.ToString("N0") + ") " +
                     "(" + WORLD.Clock.DebugText + ")";
                 
                 //Update objects in real time.
@@ -145,7 +148,6 @@ namespace BaseBuilder
                 {
                     c.Update(gameTime);
                 }
-
 
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                 {
@@ -177,7 +179,6 @@ namespace BaseBuilder
                         }
                     }
                 }
-
                 else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.Keyboard.IsKeyDown(Keys.LeftControl))
                 {
                     if ((x < 0 || y < 0 || x >= Constants.MAP_WIDTH || y >= Constants.MAP_HEIGHT) == false)
@@ -203,13 +204,13 @@ namespace BaseBuilder
                 }
             }
 
-
             // Check for exit.
             if(Controls.Keyboard.IsKeyDown(Keys.Escape))
             {
                 Exit();
             }
 
+            FrameRateCounter.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -238,9 +239,7 @@ namespace BaseBuilder
                         spriteBatch.FillRectangle(tileRectangle, Color.Black);
                     }
                 }
-            }
-
-            
+            }            
 
             Vector2 p = new Vector2(crew.Position.X, crew.Position.Y);
             Rectangle re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
@@ -309,9 +308,8 @@ namespace BaseBuilder
             }
 
             spriteBatch.End();
-
-            frameRate = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
-
+            
+            FrameRateCounter.Draw(spriteBatch);
             base.Draw(gameTime);
         }
     }
