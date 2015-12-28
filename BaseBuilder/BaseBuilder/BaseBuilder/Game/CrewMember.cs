@@ -111,7 +111,7 @@ namespace BaseBuilder
                 this.Position += direction * (float)gameTime.ElapsedGameTime.TotalSeconds * _walk_speed;
 
                 //Once a waypoint has been reached, remove it from the list.
-                //This
+                //The RemoveAt function removes the index specified, and bumps all other idexes up.
                 if (Vector2.Distance(this.Position, _path_waypoints[0]) < 1)
                 {
                     _path_waypoints[0] = this.Position;
