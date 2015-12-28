@@ -85,21 +85,24 @@ namespace BaseBuilder
             _zoom = MathHelper.Lerp(_zoom, _zoomTarget, Constants.CAMERA_ZOOM_INERTIA);
 
             // Check the mouse is against the edge of the screen
-            if (Controls.Mouse.X <= Constants.CAMERA_EDGE_SCROLL_SIZE)
+            if (Settings.MouseScrolling)
             {
-                _target.X -= scrollSpeed;
-            }
-            if (Controls.Mouse.X >= (_viewport.Width - Constants.CAMERA_EDGE_SCROLL_SIZE))
-            {
-                _target.X += scrollSpeed;
-            }
-            if (Controls.Mouse.Y <= Constants.CAMERA_EDGE_SCROLL_SIZE)
-            {
-                _target.Y -= scrollSpeed;
-            }
-            if (Controls.Mouse.Y >= (_viewport.Height - Constants.CAMERA_EDGE_SCROLL_SIZE))
-            {
-                _target.Y += scrollSpeed;
+                if (Controls.Mouse.X <= Constants.CAMERA_EDGE_SCROLL_SIZE)
+                {
+                    _target.X -= scrollSpeed;
+                }
+                if (Controls.Mouse.X >= (_viewport.Width - Constants.CAMERA_EDGE_SCROLL_SIZE))
+                {
+                    _target.X += scrollSpeed;
+                }
+                if (Controls.Mouse.Y <= Constants.CAMERA_EDGE_SCROLL_SIZE)
+                {
+                    _target.Y -= scrollSpeed;
+                }
+                if (Controls.Mouse.Y >= (_viewport.Height - Constants.CAMERA_EDGE_SCROLL_SIZE))
+                {
+                    _target.Y += scrollSpeed;
+                }
             }
             
             // Check for keyboard scrolling
