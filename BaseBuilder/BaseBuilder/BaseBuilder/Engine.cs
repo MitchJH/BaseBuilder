@@ -77,7 +77,8 @@ namespace BaseBuilder
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Sprites.MISSING_TEXTURE = Content.Load<Texture2D>("Textures/missing");
             Sprites.PIXEL = Content.Load<Texture2D>("Textures/pixel");
-            Sprites.LoadSpriteBank("Content/Data/spritebank.bin", Content);
+            Sprites.LoadSpriteBank("Content/Data/spritebank.txt", Content);
+            Audio.LoadSoundBank("Content/Data/soundbank.txt", Content);
         }
 
         protected override void UnloadContent()
@@ -130,6 +131,7 @@ namespace BaseBuilder
 
                                 //TODO: Some more formal UI class will need to handle when things are selected, not the object itself.
                                 crew_member.Selected = true;
+                                Audio.Play("high_beep");
                                 Console.WriteLine(crew_member.Name + " " + " has been selected");
                                 
                                 break;
@@ -160,12 +162,14 @@ namespace BaseBuilder
                                 path = new LinkedList<Tile>();
                                 startTile = Point.Zero;
                                 endTile = Point.Zero;
+                                Audio.Play("low_double_beep");
                             }
                             else
                             {
                                 crew.Position = new Vector2(startTile.X * Constants.TILE_SIZE, startTile.Y * Constants.TILE_SIZE);
                                 crew._waypoint = 1;
                                 crew.Destination = new Vector2(path.ElementAt(crew._waypoint).Position.X * Constants.TILE_SIZE, path.ElementAt(crew._waypoint).Position.Y * Constants.TILE_SIZE);
+                                Audio.Play("high_double_beep");
                             }
                         }
                     }
