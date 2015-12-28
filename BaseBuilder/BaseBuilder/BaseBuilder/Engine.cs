@@ -29,8 +29,6 @@ namespace BaseBuilder
         CrewMember crew = new CrewMember();
         List<CrewMember> crew_members;
 
-        Point startTile = Point.Zero;
-        Point endTile = Point.Zero;
         LinkedList<Tile> path = new LinkedList<Tile>();
         List<Vector2> curve = new List<Vector2>();
         // ############################################# //
@@ -154,9 +152,9 @@ namespace BaseBuilder
                     {
                         //If the mouseposition is within the textures bounds of a crew member...
                         //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
-                        if (mousePosition.X > c.Position.X - (default_texture.Bounds.Width / 2) && mousePosition.X < c.Position.X + (default_texture.Bounds.Width / 2))
+                        if (mousePosition.X > c.Position.X - (Sprites.MISSING_TEXTURE.Bounds.Width / 2) && mousePosition.X < c.Position.X + (Sprites.MISSING_TEXTURE.Bounds.Width / 2))
                         {
-                            if (mousePosition.Y > c.Position.Y - (default_texture.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (default_texture.Bounds.Height / 2))
+                            if (mousePosition.Y > c.Position.Y - (Sprites.MISSING_TEXTURE.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (Sprites.MISSING_TEXTURE.Bounds.Height / 2))
                             {
                                 //deselect any crew that are already selected.
                                 foreach (CrewMember cm in crew_members)
@@ -239,35 +237,7 @@ namespace BaseBuilder
                 }
             }
 
-            if (path.Count > 0)
-            {
-                for (int i = 0; i < path.Count; i++)
-                {
-                    Rectangle tileRectangle = new Rectangle(
-                        path.ElementAt(i).Position.X * Constants.TILE_SIZE, path.ElementAt(i).Position.Y * Constants.TILE_SIZE,
-                        Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                    //spriteBatch.FillRectangle(tileRectangle, Color.DarkBlue);
-
-                    if (i + 1 < path.Count)
-                    {
-                        Tile thisTile = new Tile(path.ElementAt(i).Position.X, path.ElementAt(i).Position.Y);
-                        Tile nextTile = new Tile(path.ElementAt(i + 1).Position.X, path.ElementAt(i + 1).Position.Y);
-
-                        spriteBatch.DrawLine(
-                            thisTile.Center,
-                            nextTile.Center,
-                            Color.White, 1 / Camera.Zoom);
-                    }
-                }
-
-                
-
-                foreach (Vector2 v in curve)
-                {
-                    spriteBatch.DrawCircle(v, 3, 20, Color.Red);
-                }
-            }
+            
 
             Vector2 p = new Vector2(crew.Position.X, crew.Position.Y);
             Rectangle re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
@@ -288,27 +258,52 @@ namespace BaseBuilder
                 if (crew_member.Selected)
                 {
                     spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen);
+
+                    //If a crew has a path then display it when they are selected.
+                    if (crew_member.Path.Count > 0)
+                    {
+                        for (int i = 0; i < crew_member.Path.Count; i++)
+                        {
+                            Rectangle tileRectangle = new Rectangle(
+                                crew_member.Path.ElementAt(i).Position.X * Constants.TILE_SIZE, crew_member.Path.ElementAt(i).Position.Y * Constants.TILE_SIZE,
+                                Constants.TILE_SIZE, Constants.TILE_SIZE);
+
+                            //spriteBatch.FillRectangle(tileRectangle, Color.DarkBlue);
+
+                            if (i + 1 < crew_member.Path.Count)
+                            {
+                                Tile thisTile = new Tile(crew_member.Path.ElementAt(i).Position.X, crew_member.Path.ElementAt(i).Position.Y);
+                                Tile nextTile = new Tile(crew_member.Path.ElementAt(i + 1).Position.X, crew_member.Path.ElementAt(i + 1).Position.Y);
+
+                                spriteBatch.DrawLine(thisTile.Center,nextTile.Center,Color.White, 1 / Camera.Zoom);
+                            }
+                        }
+
+                        foreach (Vector2 v in curve)
+                        {
+                            spriteBatch.DrawCircle(v, 3, 20, Color.Red);
+                        }
+                    }
+
+                    if (crew_member.StartTile != Point.Zero)
+                    {
+                        Rectangle tileRectangle = new Rectangle(
+                            crew_member.StartTile.X * Constants.TILE_SIZE, crew_member.StartTile.Y * Constants.TILE_SIZE,
+                            Constants.TILE_SIZE, Constants.TILE_SIZE);
+
+                        spriteBatch.FillRectangle(tileRectangle, Color.Green);
+                    }
+                    if (crew_member.EndTile != Point.Zero)
+                    {
+                        Rectangle tileRectangle = new Rectangle(
+                            crew_member.EndTile.X * Constants.TILE_SIZE, crew_member.EndTile.Y * Constants.TILE_SIZE,
+                            Constants.TILE_SIZE, Constants.TILE_SIZE);
+
+                        spriteBatch.FillRectangle(tileRectangle, Color.Red);
+                    }
+
                 }
             }
-
-            if (startTile != Point.Zero)
-            {
-                Rectangle tileRectangle = new Rectangle(
-                    startTile.X * Constants.TILE_SIZE, startTile.Y * Constants.TILE_SIZE,
-                    Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                spriteBatch.FillRectangle(tileRectangle, Color.Green);
-            }
-            if (endTile != Point.Zero)
-            {
-                Rectangle tileRectangle = new Rectangle(
-                    endTile.X * Constants.TILE_SIZE, endTile.Y * Constants.TILE_SIZE,
-                    Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                spriteBatch.FillRectangle(tileRectangle, Color.Red);
-            }
-
-            
 
             spriteBatch.End();
 

@@ -125,6 +125,8 @@ namespace BaseBuilder
                 }
             }
 
+            _endTile = new Point((int)Destination.X / Constants.TILE_SIZE, (int)Destination.Y / Constants.TILE_SIZE);
+
             return false;
         }
 
@@ -144,8 +146,13 @@ namespace BaseBuilder
             {
                 Console.WriteLine(" 'On my way!' ");
                 Position = new Vector2(start_location.X * Constants.TILE_SIZE, start_location.Y * Constants.TILE_SIZE);
+                
                 _waypoint = 1;
                 Destination = new Vector2(path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
+                
+                _startTile = start_location;
+                
+
             }
 
             return true;
@@ -158,11 +165,6 @@ namespace BaseBuilder
         {
             Move(gameTime);
 
-            return true;
-        }
-
-        public bool Draw()
-        {
             return true;
         }
 
@@ -208,6 +210,23 @@ namespace BaseBuilder
             set { _sprite = value; }
         }
 
+        public Point StartTile
+        {
+            get { return _startTile;  }
+            set { _startTile = value;  }
+        }
+
+        public Point EndTile
+        {
+            get { return _endTile; }
+            set { _endTile = value; }
+        }
+
+        public LinkedList<Tile> Path
+        {
+            get { return _path; }
+            set { _path = value; }
+        }
         public bool Selected
         {
             get { return _selected; }
