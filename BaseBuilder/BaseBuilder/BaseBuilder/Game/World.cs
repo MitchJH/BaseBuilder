@@ -27,6 +27,28 @@ namespace BaseBuilder
             EmptyMap();
         }
 
+        
+
+        public class RayCastingResult
+        {
+            // Does the ray collide with the environment?
+            private bool doCollide;
+            // And if so, at which position?
+            private Vector2 position;
+
+            public bool DoCollide
+            {
+                get { return doCollide; }
+                set { doCollide = value; }
+            }
+
+            public Vector2 Position
+            {
+                get { return position; }
+                set { position = value; }
+            }
+        }
+
         /// <summary>
         /// Find a path through the world
         /// </summary>
@@ -70,28 +92,8 @@ namespace BaseBuilder
                     truePath.AddLast(tempPath.ElementAt(i));
                 }
             }
-
+            Console.WriteLine("Path generation successful");
             return truePath;
-        }
-
-        public class RayCastingResult
-        {
-            // Does the ray collide with the environment?
-            private bool doCollide;
-            // And if so, at which position?
-            private Vector2 position;
-
-            public bool DoCollide
-            {
-                get { return doCollide; }
-                set { doCollide = value; }
-            }
-
-            public Vector2 Position
-            {
-                get { return position; }
-                set { position = value; }
-            }
         }
 
         public RayCastingResult RayCast(Vector2 position, Vector2 direction, float rayLength)

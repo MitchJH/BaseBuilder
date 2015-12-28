@@ -32,6 +32,7 @@ namespace BaseBuilder
         float frameRate;
 
         Texture2D default_texture;
+        bool active_selection = false;
 
         public Engine()
         {
@@ -110,12 +111,18 @@ namespace BaseBuilder
                     "(FPS: " + frameRate.ToString("N0") + ") " +
                     "(" + WORLD.Clock.DebugText + ")";
                 
+                //Update objects in real time.
+                foreach (CrewMember c in crew_members)
+                {
+                    c.Update(gameTime);
+                }
+                
+
                 // Check for a left mouse click
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                 {
                     foreach (CrewMember c in crew_members)
                     {
-                        
                         //If the mouseposition is within the textures bounds of a crew member...
                         //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
                         if (mousePosition.X > c.Position.X - (default_texture.Bounds.Width / 2) && mousePosition.X < c.Position.X + (default_texture.Bounds.Width / 2))
@@ -130,74 +137,43 @@ namespace BaseBuilder
                                         cm.Selected = false;
                                     }
                                 }
-
                                 //TODO: Some more formal UI class will need to handle when things are selected, not the object itself.
                                 c.Selected = true;
+                                active_selection = true;
                                 Console.WriteLine(c.Name + " " + " has been selected");
-                                
+
                                 break;
                             }
                         }
                     }
 
-                    if (path.Count > 0)
-                    {
-                        path.Clear();
-                        startTile = Point.Zero;
-                        endTile = Point.Zero;
-                    }
-                    else
-                    {
-                        if (startTile == Point.Zero)
-                        {
-                            startTile = new Point(x, y);
-                        }
-                        else if (endTile == Point.Zero)
-                        {
-                            endTile = new Point(x, y);
-                            path = WORLD.FindPath(startTile, endTile);
-
-                            if (path == null)
-                            {
-                                // NO PATH
-                                path = new LinkedList<Tile>();
-                                startTile = Point.Zero;
-                                endTile = Point.Zero;
-                            }
-                            else
-                            {
-                                crew.Position = new Vector2(startTile.X * Constants.TILE_SIZE, startTile.Y * Constants.TILE_SIZE);
-                                crew._waypoint = 1;
-                                crew.Destination = new Vector2(path.ElementAt(crew._waypoint).Position.X * Constants.TILE_SIZE, path.ElementAt(crew._waypoint).Position.Y * Constants.TILE_SIZE);
-                            }
-                        }
-                    }
                 }
-                else if (Controls.Mouse.RightButton == ButtonState.Pressed)
+                else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.MouseOld.RightButton == ButtonState.Released && Controls.Keyboard.IsKeyDown(Keys.LeftControl))
                 {
                     if ((x < 0 || y < 0 || x >= Constants.MAP_WIDTH || y >= Constants.MAP_HEIGHT) == false)
                     {
                         WORLD.Tiles[x, y].Type = TileType.Cliff;
                     }
                 }
-            }
-
-            if (path != null)
-            {
-                if (path.Count > 0)
+                else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.MouseOld.RightButton == ButtonState.Released)
                 {
-                    bool arrived = crew.Update(gameTime);
-
-                    if (arrived)
+                    if (active_selection)
                     {
-                        if (crew._waypoint+1 < path.Count)
+                        foreach (CrewMember cm in crew_members)
                         {
-                            crew._waypoint++;
-                            crew.Destination = new Vector2(path.ElementAt(crew._waypoint).Position.X * Constants.TILE_SIZE, path.ElementAt(crew._waypoint).Position.Y * Constants.TILE_SIZE);
+                            if (cm.Selected)
+                            {
+                                Point start_location = new Point((int)cm.Position.X / Constants.TILE_SIZE, (int)cm.Position.Y / Constants.TILE_SIZE);
+                                Point destination = new Point(x, y);
+                                Console.WriteLine("Generating Path from point (" + start_location.X + "," + start_location.Y + ") to point (" + destination.X + "," + destination.Y + ")");
+                                cm.DeterminePath(WORLD.FindPath(start_location, destination));
+
+                            }
                         }
                     }
                 }
             }
+            
 
             // Check for exit.
             if (Controls.Keyboard.IsKeyDown(Keys.Escape))

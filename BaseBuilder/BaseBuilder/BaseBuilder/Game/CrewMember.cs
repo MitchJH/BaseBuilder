@@ -26,6 +26,10 @@ namespace BaseBuilder
         private Texture2D _sprite;
         private bool _selected;
 
+        Point _startTile = Point.Zero;
+        Point _endTile = Point.Zero;
+        LinkedList<Tile> _path = new LinkedList<Tile>();
+
         public CrewMember()
             : base()
         {
@@ -53,7 +57,10 @@ namespace BaseBuilder
 
             _traits = new List<Trait>();
             _selected = false;
-            
+
+            _startTile = Point.Zero;
+            _endTile = Point.Zero;
+
             this.Destination = this.Position;
         }
 
@@ -84,6 +91,10 @@ namespace BaseBuilder
             _traits = new List<Trait>();
 
             Position = new Vector2(posX, posY);
+
+            _startTile = new Point((int)posX, (int)posY);
+            _endTile = Point.Zero;
+
             this.Destination = this.Position;
         }
 
@@ -92,7 +103,7 @@ namespace BaseBuilder
             if (this.Destination != this.Position)
             {
                 Vector2 direction = Vector2.Normalize(this.Destination - this.Position);
-                this.Position += direction * (float)gameTime.ElapsedGameTime.TotalSeconds * 60;
+                this.Position += direction * (float)gameTime.ElapsedGameTime.TotalSeconds * _walk_speed;
 
                 if (Vector2.Distance(this.Position, this.Destination) < 1)
                 {
@@ -101,20 +112,49 @@ namespace BaseBuilder
                     return true;
                 }
             }
+
+            if (_path.Count > 0)
+            {
+                if (_waypoint + 1 < _path.Count)
+                {
+                    _waypoint++;
+                    
+                    Destination = new Vector2(_path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, _path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
+                }
+            }
+
             return false;
         }
 
-        public bool DeterminePath()
+        public bool DeterminePath(LinkedList<Tile> path)
         {
+            Point start_location = new Point((int)Position.X / Constants.TILE_SIZE, (int)Position.Y / Constants.TILE_SIZE);
+            _path = path;
+
+            if (_path == null)
+            {
+                Console.WriteLine("No path found, resetting tiles.");
+                _path = new LinkedList<Tile>();
+                _startTile = Point.Zero;
+                _endTile = Point.Zero;
+            }
+            else
+            {
+                Console.WriteLine(" 'On my way!' ");
+                Position = new Vector2(start_location.X * Constants.TILE_SIZE, start_location.Y * Constants.TILE_SIZE);
+                _waypoint = 1;
+                Destination = new Vector2(path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
+            }
+
             return true;
 
         }
 
+        
+
         public bool Update(GameTime gameTime)
         {
             Move(gameTime);
-
-
 
             return true;
         }
