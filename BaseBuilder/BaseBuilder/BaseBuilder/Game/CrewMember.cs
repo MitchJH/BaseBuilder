@@ -23,7 +23,7 @@ namespace BaseBuilder
         private Stats _stats;
         private List<Trait> _traits;
 
-        private Texture2D _sprite;
+        private string _sprite;
         private bool _selected;
 
         public CrewMember()
@@ -57,7 +57,7 @@ namespace BaseBuilder
             this.Destination = this.Position;
         }
 
-        public CrewMember(string name, int age, float posX, float posY)
+        public CrewMember(string name, int age, float posX, float posY, string sprite)
             : base()
         {
             _name = name;
@@ -82,6 +82,8 @@ namespace BaseBuilder
             _run_speed = 100;
 
             _traits = new List<Trait>();
+
+            _sprite = sprite;
 
             Position = new Vector2(posX, posY);
             this.Destination = this.Position;
@@ -160,7 +162,7 @@ namespace BaseBuilder
             set { _traits = value; }
         }
 
-        public Texture2D Sprite
+        public string Sprite
         {
             get { return _sprite; }
             set { _sprite = value; }

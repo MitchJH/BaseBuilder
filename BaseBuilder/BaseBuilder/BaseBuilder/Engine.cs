@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -30,8 +31,6 @@ namespace BaseBuilder
         LinkedList<Tile> path = new LinkedList<Tile>();
         List<Vector2> curve = new List<Vector2>();
         float frameRate;
-
-        Texture2D default_texture;
 
         public Engine()
         {
@@ -65,10 +64,10 @@ namespace BaseBuilder
             //Initialzing crew members.
             crew_members = new List<CrewMember>();
             //This should be loaded in from Save File. Hardcoded for now.
-            crew_members.Add(new CrewMember("James", 23, 0, 0));
-            crew_members.Add(new CrewMember("John", 25, 250, 160));
-            crew_members.Add(new CrewMember("Joe", 33, 650, 300));
-            crew_members.Add(new CrewMember("Jim", 27, 480, 100));
+            crew_members.Add(new CrewMember("James", 23, 0, 0, "crew"));
+            crew_members.Add(new CrewMember("John", 25, 250, 160, "crew"));
+            crew_members.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
+            crew_members.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
 
             base.Initialize();
         }
@@ -78,8 +77,7 @@ namespace BaseBuilder
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Sprites.MISSING_TEXTURE = Content.Load<Texture2D>("Textures/missing");
             Sprites.PIXEL = Content.Load<Texture2D>("Textures/pixel");
-
-            default_texture = Content.Load<Texture2D>("Textures/p_front");
+            Sprites.LoadSpriteBank("Content/Data/spritebank.bin", Content);
         }
 
         protected override void UnloadContent()
@@ -113,14 +111,13 @@ namespace BaseBuilder
                 // Check for a left mouse click
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                 {
-                    foreach (CrewMember c in crew_members)
+                    foreach (CrewMember crew_member in crew_members)
                     {
-                        
                         //If the mouseposition is within the textures bounds of a crew member...
                         //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
-                        if (mousePosition.X > c.Position.X - (default_texture.Bounds.Width / 2) && mousePosition.X < c.Position.X + (default_texture.Bounds.Width / 2))
+                        if (mousePosition.X > crew_member.Position.X - (Sprites.Get(crew_member.Sprite).Bounds.Width / 2) && mousePosition.X < crew_member.Position.X + (Sprites.Get(crew_member.Sprite).Bounds.Width / 2))
                         {
-                            if (mousePosition.Y > c.Position.Y - (default_texture.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (default_texture.Bounds.Height / 2))
+                            if (mousePosition.Y > crew_member.Position.Y - (Sprites.Get(crew_member.Sprite).Bounds.Height / 2) && mousePosition.Y < crew_member.Position.Y + (Sprites.Get(crew_member.Sprite).Bounds.Height / 2))
                             {
                                 //deselect any crew that are already selected.
                                 foreach (CrewMember cm in crew_members)
@@ -132,8 +129,8 @@ namespace BaseBuilder
                                 }
 
                                 //TODO: Some more formal UI class will need to handle when things are selected, not the object itself.
-                                c.Selected = true;
-                                Console.WriteLine(c.Name + " " + " has been selected");
+                                crew_member.Selected = true;
+                                Console.WriteLine(crew_member.Name + " " + " has been selected");
                                 
                                 break;
                             }
@@ -269,21 +266,21 @@ namespace BaseBuilder
             Rectangle re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
 
             //temporary crew member.
-            spriteBatch.Draw(default_texture, re, Color.White);
+            spriteBatch.Draw(Sprites.Get(crew.Sprite), re, Color.White);
 
             //Draw every crew members sprite.
-            for (int i = 0; i < crew_members.Count; i++)
+            foreach(CrewMember crew_member in crew_members)
             {
-                p = new Vector2(crew_members[i].Position.X, crew_members[i].Position.Y);
+                p = new Vector2(crew_member.Position.X, crew_member.Position.Y);
                 
                 //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
-                re = new Rectangle((int)p.X - (default_texture.Width / 2), (int)p.Y - (default_texture.Height / 2), 64, 64);
-                spriteBatch.Draw(default_texture, re, Color.White);
+                re = new Rectangle((int)p.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)p.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
+                spriteBatch.Draw(Sprites.Get(crew_member.Sprite), re, Color.White);
 
                 //If a crew member is selected then draw a circle around them.
-                if (crew_members[i].Selected)
+                if (crew_member.Selected)
                 {
-                    spriteBatch.DrawCircle(crew_members[i].Position, 32, 20, Color.LightGreen);
+                    spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen);
                 }
             }
 
