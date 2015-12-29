@@ -24,7 +24,7 @@ namespace BaseBuilder
         private List<Trait> _traits;
 
         private string _sprite;
-        private bool _selected;
+
 
         private enum State : byte { Idle = 0, Walking = 1, Running = 2, Sleeping = 3, Building = 4};
 
@@ -71,7 +71,7 @@ namespace BaseBuilder
             _run_speed = 100;
 
             _traits = new List<Trait>();
-            _selected = false;
+            Selected = false;
 
             _startTile = Point.Zero;
             _endTile = Point.Zero;
@@ -439,11 +439,6 @@ namespace BaseBuilder
         {
             get { return _path; }
             set { _path = value; }
-        }
-        public bool Selected
-        {
-            get { return _selected; }
-            set { _selected = value; }
         }
         public string Activity
         {

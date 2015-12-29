@@ -16,7 +16,6 @@ namespace BaseBuilder
         GraphicsDeviceManager graphics;
         Color backColour = Color.FromNonPremultiplied(120, 120, 120, 255);
         SpriteBatch spriteBatch;
-        World WORLD;
 
         // ############################################# //
         // ######## EVERYTHING HERE NEEDS TO GO ######## //
@@ -28,7 +27,8 @@ namespace BaseBuilder
         Button button5;
         Rectangle bottomBar;
         Texture2D sand;
-        
+
+        InternalObject test_object;
         public void Event_Test(GUIControl sender)
         {
             Random rand = new Random();
@@ -36,7 +36,7 @@ namespace BaseBuilder
             for (int i = 0; i < 10; i++)
             {
                 CrewMember newCrew = new CrewMember("test" + i, 20 + i, rand.Next(10, 800), rand.Next(10, 500), "crew");
-                WORLD.CrewMembers.Add(newCrew);
+                World.CrewMembers.Add(newCrew);
             }
             Audio.Play("low_double_beep");
         }
@@ -101,15 +101,16 @@ namespace BaseBuilder
             // Create the camera
             Camera.Create(GraphicsDevice.Viewport);
 
-            // Create a new world object
-            WORLD = new World();
 
             //This should be loaded in from Save File. Hardcoded for now.
-            WORLD.CrewMembers.Add(new CrewMember("James", 23, 90, 60, "crew"));
-            WORLD.CrewMembers.Add(new CrewMember("John", 25, 250, 160, "crew"));
-            WORLD.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
-            WORLD.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
-            WORLD.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
+            World.CrewMembers.Add(new CrewMember("James", 23, 90, 60, "crew"));
+            World.CrewMembers.Add(new CrewMember("John", 25, 250, 160, "crew"));
+            World.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
+            World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
+            World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
+
+            //This should be loaded in from Save File. Hardcoded for now.
+            World.InternalObjects.Add(new InternalObject("Blue Bed", "Indoor bed", "Bed", 1, new Vector2(12, 12), "bed", new Vector2(2, 3)));
 
             base.Initialize();
         }
@@ -179,7 +180,7 @@ namespace BaseBuilder
         {
             Controls.Update();
             Camera.Update(gameTime);
-            WORLD.Clock.Update(gameTime, ClockSpeed.RealTime);
+            World.Clock.Update(gameTime, ClockSpeed.RealTime);
 
             if (Controls.Mouse.IsInCameraView()) // Don't do anything with the mouse if it's not in our cameras viewport.
             {
@@ -193,17 +194,17 @@ namespace BaseBuilder
                     "(Mouse: " + (int)mousePosition.X + ":" + (int)mousePosition.Y + ") " +
                     "(Tile: " + x + ":" + y + ") " +
                     "(Camera Position:{X:" + Camera.Position.X.ToString("N2") + " " + Camera.Position.Y.ToString("N2") + "} - Zoom:" + Camera.Zoom.ToString("N3") + ") " +
-                    "(" + WORLD.Clock.DebugText + ")";
+                    "(" + World.Clock.DebugText + ")";
                 
                 //Update crew in real time.
-                foreach (CrewMember c in WORLD.CrewMembers)
+                foreach (CrewMember c in World.CrewMembers)
                 {
                     c.Update(gameTime);
                 }
 
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                 {
-                    foreach (CrewMember c in WORLD.CrewMembers)
+                    foreach (CrewMember c in World.CrewMembers)
                     {
                         //If the mouseposition is within the textures bounds of a crew member...
                         //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
@@ -212,7 +213,7 @@ namespace BaseBuilder
                             if (mousePosition.Y > c.Position.Y - (Sprites.MISSING_TEXTURE.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (Sprites.MISSING_TEXTURE.Bounds.Height / 2))
                             {
                                 //deselect any crew that are already selected.
-                                foreach (CrewMember cm in WORLD.CrewMembers)
+                                foreach (CrewMember cm in World.CrewMembers)
                                 {
                                     if (cm.Selected)
                                     {
@@ -235,21 +236,21 @@ namespace BaseBuilder
                 {
                     if ((x < 0 || y < 0 || x >= Constants.MAP_WIDTH || y >= Constants.MAP_HEIGHT) == false)
                     {
-                        WORLD.Tiles[x, y].Type = TileType.Cliff;
+                        World.Tiles[x, y].Type = TileType.Cliff;
                     }
                 }
                 else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.MouseOld.RightButton == ButtonState.Released)
                 {
                     if (active_selection)
                     {
-                        foreach (CrewMember cm in WORLD.CrewMembers)
+                        foreach (CrewMember cm in World.CrewMembers)
                         {
                             if (cm.Selected)
                             {
                                 Point start_location = new Point((int)cm.Position.X / Constants.TILE_SIZE, (int)cm.Position.Y / Constants.TILE_SIZE);
                                 Point destination = new Point(x, y);
                                 Console.WriteLine("Generating Path from point (" + start_location.X + "," + start_location.Y + ") to point (" + destination.X + "," + destination.Y + ")");
-                                cm.DeterminePath(WORLD.FindPath(start_location, destination));
+                                cm.DeterminePath(World.FindPath(start_location, destination));
                             }
                         }
                     }
@@ -299,7 +300,7 @@ namespace BaseBuilder
 
                         //spriteBatch.Draw(Sprites.Get(WORLD.Tiles[x, y].Texture, 0), tileRectangle, Color.White);
 
-                        if (WORLD.Tiles[x, y].Type == TileType.Empty)
+                        if (World.Tiles[x, y].Type == TileType.Empty)
                         {
                             spriteBatch.DrawRectangle(tileRectangle, Color.Black * 0.3f, 1 / Camera.Zoom);
                         }
@@ -312,7 +313,7 @@ namespace BaseBuilder
             }
 
             //Draw every crew members sprite.
-            foreach (CrewMember crew_member in WORLD.CrewMembers)
+            foreach (CrewMember crew_member in World.CrewMembers)
             {
                 //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
                 Rectangle re = new Rectangle((int)crew_member.Position.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)crew_member.Position.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
@@ -370,6 +371,12 @@ namespace BaseBuilder
                 }
             }
 
+            foreach (InternalObject io in World.InternalObjects)
+            { 
+                Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.Sprite).Width, Sprites.Get(io.Sprite).Height);
+                spriteBatch.Draw(Sprites.Get(io.Sprite), re2, Color.White);
+            }
+
             spriteBatch.End();
 
             // ##### TESTING #####
@@ -384,7 +391,7 @@ namespace BaseBuilder
             // ##################
 
             // ##### FOR DEBUG #####
-            foreach (CrewMember crew in WORLD.CrewMembers)
+            foreach (CrewMember crew in World.CrewMembers)
             {
                 if(crew.Selected)
                 {

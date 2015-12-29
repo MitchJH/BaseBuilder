@@ -15,6 +15,7 @@ namespace BaseBuilder
 
         public int _waypoint = 0;
 
+        private bool _selected;
         public Entity()
         {
         }
@@ -30,7 +31,11 @@ namespace BaseBuilder
             get { return _destination; }
             set { _destination = value; }
         }
-
+        public bool Selected
+        {
+            get { return _selected; }
+            set { _selected = value; }
+        }
         public Facing Facing
         {
             // DOWN = 0 / 1

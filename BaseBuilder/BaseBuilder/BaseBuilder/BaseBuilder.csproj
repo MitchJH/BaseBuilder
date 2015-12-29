@@ -97,6 +97,7 @@
     <Compile Include="Framework\Primitives2D.cs" />
     <Compile Include="Framework\Settings.cs" />
     <Compile Include="Framework\Version.cs" />
+    <Compile Include="Game\InternalObject.cs" />
     <Compile Include="Game\Entity.cs" />
     <Compile Include="Game\CrewMember.cs" />
     <Compile Include="Framework\Camera.cs" />

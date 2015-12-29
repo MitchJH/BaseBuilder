@@ -11,19 +11,20 @@ namespace BaseBuilder
     /// <summary>
     /// Holds the current gamestate, used for savegame serialization.
     /// </summary>
-    public class World
+    public static class World
     {
-        private Tile[,] _tiles;
-        private Clock _clock;
-        private List<CrewMember> _crewMembers;
-        private Planet _planet;
+        private static Tile[,] _tiles;
+        private static Clock _clock;
+        private static List<CrewMember> _crewMembers;
+        private static List<InternalObject> _internal_objects;
+        private static Planet _planet;
 
-        public World()
+        static World()
         {
             _tiles = new Tile[Constants.MAP_WIDTH, Constants.MAP_HEIGHT];
             _clock = new Clock();
             _crewMembers = new List<CrewMember>();
-
+            _internal_objects = new List<InternalObject>();
             EmptyMap();
         }
 
@@ -57,7 +58,7 @@ namespace BaseBuilder
         /// <param name="extraContext">Optional: Allows the passing of extra information to the IsWalkable function in the Tile object
         /// thus allowing a tile to be walkable for different entities by only changing input parameters rather than gamestate</param>
         /// <returns>A linked list of Tile objects that is the best path between the start and end tiles</returns>
-        public LinkedList<Tile> FindPath(Point start, Point end, Object extraContext = null)
+        public static LinkedList<Tile> FindPath(Point start, Point end, Object extraContext = null)
         {
             if (start.X < 0 || start.Y < 0 || end.X < 0 || end.Y < 0)
             {
@@ -96,7 +97,7 @@ namespace BaseBuilder
             return truePath;
         }
 
-        public RayCastingResult RayCast(Vector2 position, Vector2 direction, float rayLength)
+        public static RayCastingResult RayCast(Vector2 position, Vector2 direction, float rayLength)
         {
             RayCastingResult result = new RayCastingResult();
             result.DoCollide = false;
@@ -147,7 +148,7 @@ namespace BaseBuilder
         }
 
         // Swap the values of A and B
-        private void Swap<T>(ref T a, ref T b)
+        private static void Swap<T>(ref T a, ref T b)
         {
             T c = a;
             a = b;
@@ -155,13 +156,13 @@ namespace BaseBuilder
         }
 
         // Returns the list of points from p0 to p1 
-        private List<Vector2> BresenhamLine(Vector2 p0, Vector2 p1)
+        private static List<Vector2> BresenhamLine(Vector2 p0, Vector2 p1)
         {
             return BresenhamLine((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y);
         }
 
         // Returns the list of points from (x0, y0) to (x1, y1)
-        private List<Vector2> BresenhamLine(int x0, int y0, int x1, int y1)
+        private static List<Vector2> BresenhamLine(int x0, int y0, int x1, int y1)
         {
             // Optimization: it would be preferable to calculate in
             // advance the size of "result" and to use a fixed-size array
@@ -200,7 +201,7 @@ namespace BaseBuilder
             return result;
         }
 
-        private void EmptyMap()
+        private static void EmptyMap()
         {
             for (int x = 0; x < Constants.MAP_WIDTH; x++)
             {
@@ -212,25 +213,31 @@ namespace BaseBuilder
             }
         }
 
-        public Tile[,] Tiles
+        public static Tile[,] Tiles
         {
             get { return _tiles; }
             set { _tiles = value; }
         }
 
-        public Clock Clock
+        public static Clock Clock
         {
             get { return _clock; }
             set { _clock = value; }
         }
 
-        public List<CrewMember> CrewMembers
+        public static List<CrewMember> CrewMembers
         {
             get { return _crewMembers; }
             set { _crewMembers = value; }
         }
 
-        public Planet Planet
+        public static List<InternalObject> InternalObjects
+        {
+            get { return _internal_objects; }
+            set { _internal_objects = value; }
+        }
+
+        public static Planet Planet
         {
             get { return _planet; }
             set { _planet = value; }
