@@ -79,6 +79,17 @@
     <Compile Include="Framework\Controls.cs" />
     <Compile Include="Framework\Constants.cs" />
     <Compile Include="Framework\Fonts.cs" />
+    <Compile Include="Framework\GUI\Button.cs" />
+    <Compile Include="Framework\GUI\CheckBox.cs" />
+    <Compile Include="Framework\GUI\CircleButton.cs" />
+    <Compile Include="Framework\GUI\GUIControl.cs" />
+    <Compile Include="Framework\GUI\DomainLeftRight.cs" />
+    <Compile Include="Framework\GUI\Form.cs" />
+    <Compile Include="Framework\GUI\KeyboardUtils.cs" />
+    <Compile Include="Framework\GUI\Label.cs" />
+    <Compile Include="Framework\GUI\PictureBox.cs" />
+    <Compile Include="Framework\GUI\RadioButton.cs" />
+    <Compile Include="Framework\GUI\TextBox.cs" />
     <Compile Include="Framework\Pathfinding\PriorityQueue.cs" />
     <Compile Include="Framework\Pathfinding\SpatialAStar.cs" />
     <Compile Include="Framework\FrameRateCounter.cs" />

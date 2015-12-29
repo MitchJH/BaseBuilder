@@ -15,14 +15,14 @@ namespace BaseBuilder
     {
         private Tile[,] _tiles;
         private Clock _clock;
-        private List<CrewMember> _colonists;
+        private List<CrewMember> _crewMembers;
         private Planet _planet;
 
         public World()
         {
             _tiles = new Tile[Constants.MAP_WIDTH, Constants.MAP_HEIGHT];
             _clock = new Clock();
-            _colonists = new List<CrewMember>();
+            _crewMembers = new List<CrewMember>();
 
             EmptyMap();
         }
@@ -224,10 +224,10 @@ namespace BaseBuilder
             set { _clock = value; }
         }
 
-        public List<CrewMember> Colonists
+        public List<CrewMember> CrewMembers
         {
-            get { return _colonists; }
-            set { _colonists = value; }
+            get { return _crewMembers; }
+            set { _crewMembers = value; }
         }
 
         public Planet Planet

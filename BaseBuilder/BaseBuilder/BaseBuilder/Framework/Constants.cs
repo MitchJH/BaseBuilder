@@ -15,8 +15,8 @@ namespace BaseBuilder
 
         // TILE MAP
         public const int TILE_SIZE = 32;
-        public const int MAP_WIDTH = 100;
-        public const int MAP_HEIGHT = 100;
+        public const int MAP_WIDTH = 60;
+        public const int MAP_HEIGHT = 34;
 
         // CAMERA
         // Zoom

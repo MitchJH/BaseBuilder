@@ -52,5 +52,13 @@ namespace BaseBuilder
             }
             return null;
         }
+
+        public static SpriteFont Standard
+        {
+            get
+            {
+                return _fonts["Standard"];
+            }
+        }
     }
 }

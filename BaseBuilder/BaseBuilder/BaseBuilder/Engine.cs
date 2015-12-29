@@ -11,25 +11,46 @@ using Microsoft.Xna.Framework.Media;
 
 namespace BaseBuilder
 {
-    /// <summary>
-    /// This is the main type for your game
-    /// </summary>
     public class Engine : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
+        Color backColour = Color.FromNonPremultiplied(120, 120, 120, 255);
         SpriteBatch spriteBatch;
         World WORLD;
 
         // ############################################# //
         // ######## EVERYTHING HERE NEEDS TO GO ######## //
         // ############################################# //
-        List<CrewMember> crew_members;
+        Button button1;
+        Button button2;
+        Button button3;
+        Button button4;
+        Button button5;
+        Rectangle bottomBar;
+        Texture2D sand;
+        
+        public void Event_Test(GUIControl sender)
+        {
+            Random rand = new Random();
 
-        // ############################################# //
-        // ############################################# //
+            for (int i = 0; i < 10; i++)
+            {
+                CrewMember newCrew = new CrewMember("test" + i, 20 + i, rand.Next(10, 800), rand.Next(10, 500), "crew");
+                WORLD.CrewMembers.Add(newCrew);
+            }
+            Audio.Play("low_double_beep");
+        }
+        public void Do_Beep(GUIControl sender)
+        {
+            SoundEffectInstance sei = Audio.Get("click").CreateInstance();
+            sei.Volume = (0.2f) / Settings.MasterVolume;
+            sei.Play();
+        }
 
         // ##### THIS WILL GO INTO A UI CLASS LATER #### //
         bool active_selection = false;
+        // ############################################# //
+        // ############################################# //
 
         public Engine(string[] args)
         {
@@ -83,14 +104,12 @@ namespace BaseBuilder
             // Create a new world object
             WORLD = new World();
 
-            //Initialzing crew members.
-            crew_members = new List<CrewMember>();
             //This should be loaded in from Save File. Hardcoded for now.
-            crew_members.Add(new CrewMember("James", 23, 50, 20, "crew"));
-            crew_members.Add(new CrewMember("John", 25, 250, 160, "crew"));
-            crew_members.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
-            crew_members.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
-            crew_members.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
+            WORLD.CrewMembers.Add(new CrewMember("James", 23, 90, 60, "crew"));
+            WORLD.CrewMembers.Add(new CrewMember("John", 25, 250, 160, "crew"));
+            WORLD.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
+            WORLD.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
+            WORLD.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
 
             base.Initialize();
         }
@@ -117,6 +136,37 @@ namespace BaseBuilder
 
             // Enable version display
             Version.Enable();
+
+
+            // #### TESTING BELOW ####
+            sand = Content.Load<Texture2D>("Textures/sand");
+            Texture2D tex = Content.Load<Texture2D>("Textures/button");
+            Rectangle screen = GraphicsDevice.Viewport.Bounds;
+            int buttonSize = 60;
+            int buttomRoom = 20;
+
+            button1 = new Button("testButton1", "\n\n\n\n\n\nCrew", new Rectangle(20, (screen.Height - buttonSize) - buttomRoom, buttonSize, buttonSize), tex, Fonts.Get("ButtonText"), Color.White);
+            button1.onClick += new EHandler(Event_Test);
+            button1.onMouseEnter += new EHandler(Do_Beep);
+
+            button2 = new Button("testButton2", "\n\n\n\n\n\nBase", new Rectangle(100, (screen.Height - buttonSize) - buttomRoom, buttonSize, buttonSize), tex, Fonts.Get("ButtonText"), Color.White);
+            button2.onClick += new EHandler(Event_Test);
+            button2.onMouseEnter += new EHandler(Do_Beep);
+
+            button3 = new Button("testButton3", "\n\n\n\n\n\nBuild", new Rectangle(180, (screen.Height - buttonSize) - buttomRoom, buttonSize, buttonSize), tex, Fonts.Get("ButtonText"), Color.White);
+            button3.onClick += new EHandler(Event_Test);
+            button3.onMouseEnter += new EHandler(Do_Beep);
+
+            button4 = new Button("testButton4", "\n\n\n\n\n\nTasks", new Rectangle(260, (screen.Height - buttonSize) - buttomRoom, buttonSize, buttonSize), tex, Fonts.Get("ButtonText"), Color.White);
+            button4.onClick += new EHandler(Event_Test);
+            button4.onMouseEnter += new EHandler(Do_Beep);
+
+            button5 = new Button("testButton5", "\n\n\n\n\n\nMissions", new Rectangle(340, (screen.Height - buttonSize) - buttomRoom, buttonSize, buttonSize), tex, Fonts.Get("ButtonText"), Color.White);
+            button5.onClick += new EHandler(Event_Test);
+            button5.onMouseEnter += new EHandler(Do_Beep);
+
+            int barSize = ((screen.Height - buttonSize) - buttomRoom) + (buttonSize / 2);
+            bottomBar = new Rectangle(0, barSize, screen.Width, barSize);
         }
 
         protected override void UnloadContent()
@@ -145,14 +195,14 @@ namespace BaseBuilder
                     "(" + WORLD.Clock.DebugText + ")";
                 
                 //Update crew in real time.
-                foreach (CrewMember c in crew_members)
+                foreach (CrewMember c in WORLD.CrewMembers)
                 {
                     c.Update(gameTime);
                 }
 
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                 {
-                    foreach (CrewMember c in crew_members)
+                    foreach (CrewMember c in WORLD.CrewMembers)
                     {
                         //If the mouseposition is within the textures bounds of a crew member...
                         //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
@@ -161,7 +211,7 @@ namespace BaseBuilder
                             if (mousePosition.Y > c.Position.Y - (Sprites.MISSING_TEXTURE.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (Sprites.MISSING_TEXTURE.Bounds.Height / 2))
                             {
                                 //deselect any crew that are already selected.
-                                foreach (CrewMember cm in crew_members)
+                                foreach (CrewMember cm in WORLD.CrewMembers)
                                 {
                                     if (cm.Selected)
                                     {
@@ -191,7 +241,7 @@ namespace BaseBuilder
                 {
                     if (active_selection)
                     {
-                        foreach (CrewMember cm in crew_members)
+                        foreach (CrewMember cm in WORLD.CrewMembers)
                         {
                             if (cm.Selected)
                             {
@@ -211,39 +261,54 @@ namespace BaseBuilder
                 Exit();
             }
 
+            // ##### TESTING #####
+            button1.Update(Controls.Mouse, Controls.Keyboard);
+            button2.Update(Controls.Mouse, Controls.Keyboard);
+            button3.Update(Controls.Mouse, Controls.Keyboard);
+            button4.Update(Controls.Mouse, Controls.Keyboard);
+            button5.Update(Controls.Mouse, Controls.Keyboard);
+            // ###################
+
             FrameRateCounter.Update(gameTime);
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(backColour);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, Camera.Transform);
 
-            for (int x = 0; x < Constants.MAP_WIDTH; x++)
+            //spriteBatch.Draw(sand, sand.Bounds, Color.White);
+            spriteBatch.Draw(sand, new Rectangle(0,0, Constants.MAP_WIDTH * Constants.TILE_SIZE, Constants.MAP_HEIGHT * Constants.TILE_SIZE), Color.White);
+            bool showGrid = true;
+
+            if (showGrid)
             {
-                for (int y = 0; y < Constants.MAP_HEIGHT; y++)
+                for (int x = 0; x < Constants.MAP_WIDTH; x++)
                 {
-                    Rectangle tileRectangle = new Rectangle(
-                        x * Constants.TILE_SIZE, y * Constants.TILE_SIZE,
-                        Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                    //spriteBatch.Draw(Sprites.Get(WORLD.Tiles[x, y].Texture, 0), tileRectangle, Color.White);
-
-                    if (WORLD.Tiles[x, y].Type == TileType.Empty)
+                    for (int y = 0; y < Constants.MAP_HEIGHT; y++)
                     {
-                        spriteBatch.DrawRectangle(tileRectangle, Color.Black, 1 / Camera.Zoom);
-                    }
-                    else
-                    {
-                        spriteBatch.FillRectangle(tileRectangle, Color.Black);
+                        Rectangle tileRectangle = new Rectangle(
+                            x * Constants.TILE_SIZE, y * Constants.TILE_SIZE,
+                            Constants.TILE_SIZE, Constants.TILE_SIZE);
+
+                        //spriteBatch.Draw(Sprites.Get(WORLD.Tiles[x, y].Texture, 0), tileRectangle, Color.White);
+
+                        if (WORLD.Tiles[x, y].Type == TileType.Empty)
+                        {
+                            spriteBatch.DrawRectangle(tileRectangle, Color.Black * 0.3f, 1 / Camera.Zoom);
+                        }
+                        else
+                        {
+                            spriteBatch.FillRectangle(tileRectangle, Color.Black);
+                        }
                     }
                 }
-            }            
+            }
 
             //Draw every crew members sprite.
-            foreach(CrewMember crew_member in crew_members)
+            foreach (CrewMember crew_member in WORLD.CrewMembers)
             {
                 //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
                 Rectangle re = new Rectangle((int)crew_member.Position.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)crew_member.Position.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
@@ -299,6 +364,17 @@ namespace BaseBuilder
             }
 
             spriteBatch.End();
+
+            // ##### TESTING #####
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            spriteBatch.Draw(Sprites.PIXEL, bottomBar, Color.Black * 0.75f);
+            button1.Draw(spriteBatch);
+            button2.Draw(spriteBatch);
+            button3.Draw(spriteBatch);
+            button4.Draw(spriteBatch);
+            button5.Draw(spriteBatch);
+            spriteBatch.End();
+            // ##################
             
             FrameRateCounter.Draw(spriteBatch);
             Version.Draw(spriteBatch);

@@ -2,3 +2,4 @@
 high_beep,Audio/high_beep
 high_double_beep,Audio/high_double_beep
 low_double_beep,Audio/low_double_beep
+click,Audio/click

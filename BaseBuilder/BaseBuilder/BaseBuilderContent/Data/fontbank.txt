@@ -1,3 +1,4 @@
 # ID, Filepath
 Standard,Fonts/Standard
+ButtonText,Fonts/ButtonText
 Tiny,Fonts/Tiny
