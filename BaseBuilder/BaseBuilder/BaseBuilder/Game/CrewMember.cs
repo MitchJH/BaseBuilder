@@ -26,15 +26,21 @@ namespace BaseBuilder
         private string _sprite;
         private bool _selected;
 
+        private enum State : byte { Idle = 0, Walking = 1, Running = 2, Sleeping = 3, Building = 4};
+
         Point _startTile = Point.Zero;
         Point _endTile = Point.Zero;
+
         LinkedList<Tile> _path = new LinkedList<Tile>();
         List<Vector2> _path_waypoints = new List<Vector2>();
+
+
+        byte _current_state;            //The physical state which the crew member is currently in.
+        float _current_exertion_rate;   //The current exertion rate the crew member has.
 
         public CrewMember()
             : base()
         {
-
             _name = "NO_NAME";
             _age = 0;
             _country = new Country();
@@ -97,18 +103,28 @@ namespace BaseBuilder
 
             _startTile = new Point((int)posX, (int)posY);
             _endTile = Point.Zero;
+            
+            _current_state = 0;
 
             this.Destination = this.Position;
         }
 
+
+
         public bool Move(GameTime gameTime)
         {
+            
             //If there are currently waypoints determined, the crew member will start moving to the next waypoint.
             //The waypoint they move to is always at index 0 in the list.
             if (_path_waypoints.Count > 0)
             {
                 Vector2 direction = Vector2.Normalize(_path_waypoints[0] - this.Position);
                 this.Position += direction * (float)gameTime.ElapsedGameTime.TotalSeconds * _walk_speed;
+
+                if (_current_state != (byte)State.Walking)
+                {
+                    StateChange(State.Walking);
+                }
 
                 //Once a waypoint has been reached, remove it from the list.
                 //The RemoveAt function removes the index specified, and bumps all other idexes up.
@@ -118,6 +134,14 @@ namespace BaseBuilder
                     _path_waypoints.RemoveAt(0);
                     
                     return true;
+                }
+            }
+            else
+            {
+                if (_current_state != (byte)State.Idle)
+                {
+                    StateChange(State.Idle);
+                    Console.WriteLine(Name + ": ' I have arrived! My energy is now " + _needs.Energy + "'");
                 }
             }
 
@@ -131,7 +155,8 @@ namespace BaseBuilder
 
                     _path_waypoints.Add(new Vector2(Destination.X + (Constants.TILE_SIZE / 2), Destination.Y + (Constants.TILE_SIZE / 2)));
 
-                    Console.WriteLine("added ("+ Destination.X + "," + Destination.Y + ") to the route.");
+                    //Debug
+                    //Console.WriteLine("added ("+ Destination.X + "," + Destination.Y + ") to the route.");
                 }
             }
 
@@ -172,12 +197,115 @@ namespace BaseBuilder
         }
 
         
+        public bool UpdateNeeds(GameTime gameTime)
+        {
+            _needs.Health += CalculateHealth(gameTime);
+            _needs.Energy += CalculateEnergy(gameTime);
+            _needs.Hunger += CalculateHunger(gameTime);
+            _needs.Thirst += CalculateThirst(gameTime);
+            _needs.Stress += CalculateStress(gameTime);
+            
+            return true;
+        }
 
+        /*This method handles the different states a crew member can be in. More to be added over time.
+         * A seperate method for emotional states and other things will be used. This is their physical state.
+         */
+        private bool StateChange(State newState)
+        {
+            
+            _current_state = (byte)newState;
+            _current_exertion_rate = GetExertionRate(newState);
+
+            if (newState == State.Idle)
+            {
+                Console.WriteLine(Name + ": ' I am now idle. '");
+            }
+            else if (newState == State.Walking)
+            {
+                Console.WriteLine(Name + ": ' I am now walking! '");
+            }
+            else if (newState == State.Running)
+            {
+                Console.WriteLine(Name + ": ' I am now running! '");
+            }
+            else if (newState == State.Sleeping)
+            {
+                Console.WriteLine(Name + ": ' Time for bed! Zz. '");
+            }
+            else if (newState == State.Building)
+            {
+                Console.WriteLine(Name + ": ' Building the structure sir! '");
+            }
+
+            return true;
+
+        }
+
+        private float CalculateHealth(GameTime gameTime)
+        {
+            float rate_of_change = 0.0f;
+            return rate_of_change;
+        }
+
+        private float CalculateEnergy(GameTime gameTime)
+        {
+            float rate_of_change = _current_exertion_rate * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            
+            return rate_of_change;
+        }
+
+        private float CalculateHunger(GameTime gameTime)
+        {
+            float rate_of_change = _current_exertion_rate * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            
+            return rate_of_change;
+
+        }
+
+        private float CalculateThirst(GameTime gameTime)
+        {
+            float amount = 0;
+            return amount;
+
+        }
+
+        private float CalculateStress(GameTime gameTime)
+        {
+            float amount = 0;
+            return amount;
+
+        }
         public bool Update(GameTime gameTime)
         {
             Move(gameTime);
+            
+            UpdateNeeds(gameTime);
 
             return true;
+        }
+
+        /*Assigns the exertion rate for each different state. That is the rate at which the crew member get's tired.
+         */
+        private float GetExertionRate(State newState)
+        {
+            switch (newState)
+            {
+                case State.Idle:
+                    return -0.1f;
+                case State.Walking:
+                    return -0.3f;
+                case State.Running:
+                    return -0.8f;
+                case State.Sleeping:
+                    return 1.0f;
+                case State.Building:
+                    return -0.5f;
+            }
+
+            Console.WriteLine(Name + ": ' ERROR! I'm not sure what my exertion rate is... Have you added a new state but not set an exertion rate? '");
+            
+            return 0;
         }
 
         public string Name
