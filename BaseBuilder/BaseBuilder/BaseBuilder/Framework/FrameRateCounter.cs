@@ -21,17 +21,16 @@ namespace BaseBuilder
             _frameRate = 0;
             _frameCounter = 0;
             _elapsedTime = TimeSpan.Zero;
+            _font = Fonts.Get("Standard");
         }
 
         public static void Enable()
         {
-            _font = Fonts.Get("Standard");
             _enabled = true;
         }
 
         public static void Disable()
         {
-            _font = null;
             _enabled = false;
         }
 
@@ -61,18 +60,18 @@ namespace BaseBuilder
 
                 if (_frameRate >= 50)
                 {
-                    spriteBatch.DrawString(_font, fps, new Vector2(2, 2), Color.Black);
-                    spriteBatch.DrawString(_font, fps, new Vector2(1, 1), Color.Green);
+                    spriteBatch.DrawString(_font, fps, new Vector2(2, 1), Color.Black);
+                    spriteBatch.DrawString(_font, fps, new Vector2(1, 0), Color.Green);
                 }
                 else if (_frameRate < 30)
                 {
-                    spriteBatch.DrawString(_font, fps, new Vector2(2, 2), Color.Black);
-                    spriteBatch.DrawString(_font, fps, new Vector2(1, 1), Color.Red);
+                    spriteBatch.DrawString(_font, fps, new Vector2(2, 1), Color.Black);
+                    spriteBatch.DrawString(_font, fps, new Vector2(1, 0), Color.Red);
                 }
                 else
                 {
-                    spriteBatch.DrawString(_font, fps, new Vector2(2, 2), Color.Black);
-                    spriteBatch.DrawString(_font, fps, new Vector2(1, 1), Color.Orange);
+                    spriteBatch.DrawString(_font, fps, new Vector2(2, 1), Color.Black);
+                    spriteBatch.DrawString(_font, fps, new Vector2(1, 0), Color.Orange);
                 }
 
                 spriteBatch.End();

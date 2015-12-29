@@ -21,6 +21,7 @@ namespace BaseBuilder
         private static bool _mouseVisible;
         private static bool _fixedTimestep;
         private static bool _mouseScrolling;
+        private static float _masterVolume;
 
         static Settings()
         {
@@ -36,9 +37,68 @@ namespace BaseBuilder
             _mouseVisible = true;
             _fixedTimestep = false;
             _mouseScrolling = true;
+            _masterVolume = 1.0f;
         }
 
-        public static void Load()
+        private static void ParseSettings(List<string> settings)
+        {
+            foreach (string setting in settings)
+            {
+                if (setting.StartsWith("#") == false)
+                {
+                    string[] split = setting.Split(' ');
+                    string value = split[1];
+
+                    if (setting.StartsWith("window_mode"))
+                    {
+                        _windowMode = (WindowMode)Enum.Parse(typeof(WindowMode), value);
+                    }
+                    else if (setting.StartsWith("x_res"))
+                    {
+                        _X_resolution = int.Parse(value);
+                    }
+                    else if (setting.StartsWith("y_res"))
+                    {
+                        _Y_resolution = int.Parse(value);
+                    }
+                    else if (setting.StartsWith("window_width"))
+                    {
+                        _window_width = int.Parse(value);
+                    }
+                    else if (setting.StartsWith("window_height"))
+                    {
+                        _window_height = int.Parse(value);
+                    }
+                    else if (setting.StartsWith("x_pos"))
+                    {
+                        _X_windowPos = int.Parse(value);
+                    }
+                    else if (setting.StartsWith("y_pos"))
+                    {
+                        _Y_windowPos = int.Parse(value);
+                    }
+                    else if (setting.StartsWith("mouse_visible"))
+                    {
+                        _mouseVisible = bool.Parse(value);
+                    }
+                    else if (setting.StartsWith("fixed_timestep"))
+                    {
+                        _fixedTimestep = bool.Parse(value);
+                    }
+                    else if (setting.StartsWith("mouse_scrolling"))
+                    {
+                        _mouseScrolling = bool.Parse(value);
+                    }
+                    else if (setting.StartsWith("master_volume"))
+                    {
+                        _masterVolume = float.Parse(value);
+                        _masterVolume = MathHelper.Clamp(_masterVolume, 0.0f, 1.0f);
+                    }
+                }
+            }
+        }
+
+        public static void LoadFromFile()
         {
             if (Directory.Exists(appDataPath))
             {
@@ -47,62 +107,26 @@ namespace BaseBuilder
                 if (File.Exists(file))
                 {
                     string[] lines = File.ReadAllLines(file);
-
-                    foreach (string line in lines)
-                    {
-                        if (line.StartsWith("#") == false)
-                        {
-                            string[] split = line.Split(' ');
-                            string value = split[1];
-
-                            if (line.StartsWith("window_mode"))
-                            {
-                                _windowMode = (WindowMode)Enum.Parse(typeof(WindowMode), value);
-                            }
-                            else if (line.StartsWith("x_res"))
-                            {
-                                _X_resolution = int.Parse(value);
-                            }
-                            else if (line.StartsWith("y_res"))
-                            {
-                                _Y_resolution = int.Parse(value);
-                            }
-                            else if (line.StartsWith("window_width"))
-                            {
-                                _window_width = int.Parse(value);
-                            }
-                            else if (line.StartsWith("window_height"))
-                            {
-                                _window_height = int.Parse(value);
-                            }
-                            else if (line.StartsWith("x_pos"))
-                            {
-                                _X_windowPos = int.Parse(value);
-                            }
-                            else if (line.StartsWith("y_pos"))
-                            {
-                                _Y_windowPos = int.Parse(value);
-                            }
-                            else if (line.StartsWith("mouse_visible"))
-                            {
-                                _mouseVisible = bool.Parse(value);
-                            }
-                            else if (line.StartsWith("fixed_timestep"))
-                            {
-                                _fixedTimestep = bool.Parse(value);
-                            }
-                            else if (line.StartsWith("mouse_scrolling"))
-                            {
-                                _mouseScrolling = bool.Parse(value);
-                            }
-                        }
-                    }
+                    ParseSettings(lines.ToList());
                 }
             }
             else
             {
                 Directory.CreateDirectory(appDataPath);
             }
+        }
+
+        public static void ParseCommandLineArguments(string[] args)
+        {
+            List<string> settings = new List<string>();
+
+            foreach (string arg in args)
+            {
+                string fixed_arg = arg.Replace("=", " ");
+                settings.Add(fixed_arg);
+            }
+
+            ParseSettings(settings);
         }
 
         public static WindowMode WindowMode
@@ -163,6 +187,12 @@ namespace BaseBuilder
         {
             get { return Settings._mouseScrolling; }
             set { Settings._mouseScrolling = value; }
+        }
+
+        public static float MasterVolume
+        {
+            get { return Settings._masterVolume; }
+            set { Settings._masterVolume = value; }
         }
     }
 

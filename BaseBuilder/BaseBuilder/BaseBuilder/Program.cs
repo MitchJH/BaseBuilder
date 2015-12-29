@@ -10,7 +10,7 @@ namespace BaseBuilder
         /// </summary>
         static void Main(string[] args)
         {
-            using (Engine game = new Engine())
+            using (Engine game = new Engine(args))
             {
                 game.Run();
             }

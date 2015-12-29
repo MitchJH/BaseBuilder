@@ -33,13 +33,15 @@ namespace BaseBuilder
 
         bool active_selection = false;
 
-        public Engine()
+        public Engine(string[] args)
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
             // Load the settings file
-            Settings.Load();
+            Settings.LoadFromFile();
+            // Parse any command line arguments
+            Settings.ParseCommandLineArguments(args);
 
             // Set mouse visibility and fixed timestep
             this.IsMouseVisible = Settings.IsMouseVisible;
@@ -114,6 +116,9 @@ namespace BaseBuilder
 
             // Enable the FPS counter
             FrameRateCounter.Enable();
+
+            // Enable version display
+            Version.Enable();
         }
 
         protected override void UnloadContent()
@@ -140,7 +145,7 @@ namespace BaseBuilder
                 this.Window.Title = "DEBUG - " +
                     "(Mouse: " + (int)mousePosition.X + ":" + (int)mousePosition.Y + ") " +
                     "(Tile: " + x + ":" + y + ") " +
-                    "(Camera: Position:" + Camera.Position + " - Zoom:" + Camera.Zoom + ") " +
+                    "(Camera Position:{X:" + Camera.Position.X.ToString("N2") + " " + Camera.Position.Y.ToString("N2") + "} - Zoom:" + Camera.Zoom.ToString("N3") + ") " +
                     "(" + WORLD.Clock.DebugText + ")";
                 
                 //Update objects in real time.
@@ -310,6 +315,7 @@ namespace BaseBuilder
             spriteBatch.End();
             
             FrameRateCounter.Draw(spriteBatch);
+            Version.Draw(spriteBatch);
             base.Draw(gameTime);
         }
     }

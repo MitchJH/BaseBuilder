@@ -55,7 +55,9 @@ namespace BaseBuilder
             {
                 if (_sounds.ContainsKey(key))
                 {
-                    _sounds[key].Play();
+                    SoundEffectInstance sei = _sounds[key].CreateInstance();
+                    sei.Volume = Settings.MasterVolume;
+                    sei.Play();
                     return true;
                 }
             }
