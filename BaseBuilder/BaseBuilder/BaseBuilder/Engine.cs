@@ -23,14 +23,12 @@ namespace BaseBuilder
         // ############################################# //
         // ######## EVERYTHING HERE NEEDS TO GO ######## //
         // ############################################# //
-        CrewMember crew = new CrewMember();
         List<CrewMember> crew_members;
 
-        LinkedList<Tile> path = new LinkedList<Tile>();
-        List<Vector2> curve = new List<Vector2>();
         // ############################################# //
         // ############################################# //
 
+        // ##### THIS WILL GO INTO A UI CLASS LATER #### //
         bool active_selection = false;
 
         public Engine(string[] args)
@@ -140,15 +138,13 @@ namespace BaseBuilder
                 int x = (int)(mousePosition.X / Constants.TILE_SIZE);
                 int y = (int)(mousePosition.Y / Constants.TILE_SIZE);
 
-                Facing f = crew.Facing;
-
                 this.Window.Title = "DEBUG - " +
                     "(Mouse: " + (int)mousePosition.X + ":" + (int)mousePosition.Y + ") " +
                     "(Tile: " + x + ":" + y + ") " +
                     "(Camera Position:{X:" + Camera.Position.X.ToString("N2") + " " + Camera.Position.Y.ToString("N2") + "} - Zoom:" + Camera.Zoom.ToString("N3") + ") " +
                     "(" + WORLD.Clock.DebugText + ")";
                 
-                //Update objects in real time.
+                //Update crew in real time.
                 foreach (CrewMember c in crew_members)
                 {
                     c.Update(gameTime);
@@ -246,19 +242,11 @@ namespace BaseBuilder
                 }
             }            
 
-            Vector2 p = new Vector2(crew.Position.X, crew.Position.Y);
-            Rectangle re = new Rectangle((int)p.X, (int)p.Y, 64, 64);
-
-            //temporary crew member.
-            spriteBatch.Draw(Sprites.Get(crew.Sprite), re, Color.White);
-
             //Draw every crew members sprite.
             foreach(CrewMember crew_member in crew_members)
             {
-                p = new Vector2(crew_member.Position.X, crew_member.Position.Y);
-                
                 //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
-                re = new Rectangle((int)p.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)p.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
+                Rectangle re = new Rectangle((int)crew_member.Position.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)crew_member.Position.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
                 spriteBatch.Draw(Sprites.Get(crew_member.Sprite), re, Color.White);
 
                 //If a crew member is selected then draw a circle around them.
@@ -285,13 +273,11 @@ namespace BaseBuilder
                                 spriteBatch.DrawLine(thisTile.Center,nextTile.Center,Color.White, 1 / Camera.Zoom);
                             }
                         }
-
-                        foreach (Vector2 v in curve)
-                        {
-                            spriteBatch.DrawCircle(v, 3, 20, Color.Red);
-                        }
                     }
 
+                    /* This is probably just debug for now, but it's the code for drawing in the Red and Green Square for pathfinding.
+                     * 
+                     */
                     if (crew_member.StartTile != Point.Zero)
                     {
                         Rectangle tileRectangle = new Rectangle(
