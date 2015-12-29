@@ -79,6 +79,7 @@
     <Compile Include="Framework\Controls.cs" />
     <Compile Include="Framework\Constants.cs" />
     <Compile Include="Framework\Fonts.cs" />
+    <Compile Include="Framework\DebugCrewStats.cs" />
     <Compile Include="Framework\GUI\Button.cs" />
     <Compile Include="Framework\GUI\CheckBox.cs" />
     <Compile Include="Framework\GUI\CircleButton.cs" />

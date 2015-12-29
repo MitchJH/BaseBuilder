@@ -43,7 +43,7 @@ namespace BaseBuilder
         public void Do_Beep(GUIControl sender)
         {
             SoundEffectInstance sei = Audio.Get("click").CreateInstance();
-            sei.Volume = (0.2f) / Settings.MasterVolume;
+            //sei.Volume = (0.2f) / Settings.MasterVolume;
             sei.Play();
         }
 
@@ -133,7 +133,8 @@ namespace BaseBuilder
 
             // Enable the FPS counter
             FrameRateCounter.Enable();
-
+            //Enable Crew Stats
+            DebugCrewStats.Enable();
             // Enable version display
             Version.Enable();
 
@@ -270,6 +271,9 @@ namespace BaseBuilder
             // ###################
 
             FrameRateCounter.Update(gameTime);
+
+            DebugCrewStats.Update(gameTime);
+
             base.Update(gameTime);
         }
 
@@ -318,6 +322,9 @@ namespace BaseBuilder
                 if (crew_member.Selected)
                 {
                     spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen);
+                    
+                    //DEBUG: Display their needs.
+                    
 
                     //If a crew has a path then display it when they are selected.
                     if (crew_member.Path.Count > 0)
@@ -375,7 +382,17 @@ namespace BaseBuilder
             button5.Draw(spriteBatch);
             spriteBatch.End();
             // ##################
-            
+
+            // ##### FOR DEBUG #####
+            foreach (CrewMember crew in WORLD.CrewMembers)
+            {
+                if(crew.Selected)
+                {
+                    DebugCrewStats.Draw(spriteBatch, crew);
+                }
+            }
+            // #####################
+
             FrameRateCounter.Draw(spriteBatch);
             Version.Draw(spriteBatch);
             base.Draw(gameTime);

@@ -28,6 +28,8 @@ namespace BaseBuilder
 
         private enum State : byte { Idle = 0, Walking = 1, Running = 2, Sleeping = 3, Building = 4};
 
+        
+
         Point _startTile = Point.Zero;
         Point _endTile = Point.Zero;
 
@@ -37,6 +39,12 @@ namespace BaseBuilder
 
         byte _current_state;            //The physical state which the crew member is currently in.
         float _current_exertion_rate;   //The current exertion rate the crew member has.
+        float _current_damage_rate;     //The current rate at which damage is applied. This is WIP. Needs design check.
+        float _current_hunger_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects hunger.
+        float _current_thirst_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects thirst.
+        float _current_stress_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects stress.
+        
+        private string _activity;       //A description of what the crew member is doing.
 
         public CrewMember()
             : base()
@@ -68,6 +76,7 @@ namespace BaseBuilder
             _startTile = Point.Zero;
             _endTile = Point.Zero;
 
+            _activity = "Idle";
             this.Destination = this.Position;
         }
 
@@ -105,6 +114,13 @@ namespace BaseBuilder
             _endTile = Point.Zero;
             
             _current_state = 0;
+            _current_exertion_rate = GetExertionRate(State.Idle);
+            _current_damage_rate = -1;
+            _current_hunger_rate = -0.2f;
+            _current_thirst_rate = -0.25f;
+            _current_stress_rate = -0.001f;
+
+            _activity = "Idle";
 
             this.Destination = this.Position;
         }
@@ -199,12 +215,16 @@ namespace BaseBuilder
         
         public bool UpdateNeeds(GameTime gameTime)
         {
-            _needs.Health += CalculateHealth(gameTime);
-            _needs.Energy += CalculateEnergy(gameTime);
-            _needs.Hunger += CalculateHunger(gameTime);
-            _needs.Thirst += CalculateThirst(gameTime);
-            _needs.Stress += CalculateStress(gameTime);
+            CalculateHealth(gameTime);
+
+            CalculateEnergy(gameTime);
+
+            CalculateHunger(gameTime);
             
+            CalculateThirst(gameTime);
+            
+            CalculateStress(gameTime);
+
             return true;
         }
 
@@ -220,22 +240,28 @@ namespace BaseBuilder
             if (newState == State.Idle)
             {
                 Console.WriteLine(Name + ": ' I am now idle. '");
+                _activity = "Idle.";
             }
             else if (newState == State.Walking)
             {
                 Console.WriteLine(Name + ": ' I am now walking! '");
+                _activity = "Walking.";
+                //_activity = "Walking from (" + _startTile.X + "," + _startTile.Y + ") to (" + _endTile.X + "," + _endTile.Y + ")";
             }
             else if (newState == State.Running)
             {
                 Console.WriteLine(Name + ": ' I am now running! '");
+                _activity = "Running from (" + _startTile.X + "," + _startTile.Y + ") to (" + _endTile.X + "," + _endTile.Y + ")";
             }
             else if (newState == State.Sleeping)
             {
                 Console.WriteLine(Name + ": ' Time for bed! Zz. '");
+                _activity = "Sleeping.";
             }
             else if (newState == State.Building)
             {
                 Console.WriteLine(Name + ": ' Building the structure sir! '");
+                _activity = "Constructing...";
             }
 
             return true;
@@ -245,37 +271,83 @@ namespace BaseBuilder
         private float CalculateHealth(GameTime gameTime)
         {
             float rate_of_change = 0.0f;
+
+            //If hunger or thirst is below 0.
+            if(_needs.Hunger <= 0 || _needs.Thirst <= 0)
+            {
+                rate_of_change = _current_damage_rate * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+
+            _needs.Health += rate_of_change;
+
+            if (_needs.Health <= 0)
+            {
+                _needs.Health = 0;
+            }
+
             return rate_of_change;
         }
 
-        private float CalculateEnergy(GameTime gameTime)
+        private void CalculateEnergy(GameTime gameTime)
         {
-            float rate_of_change = _current_exertion_rate * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            
-            return rate_of_change;
+            float rate_of_change = 0;
+
+            //When hungry, energy is burned faster.
+            float hunger_modifier = 1.0f;
+
+            if (_needs.Hunger <= 0)
+            {
+                hunger_modifier = 1.2f;
+            }
+
+            _needs.Energy += rate_of_change = (_current_exertion_rate * hunger_modifier) * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            //If the need has gone below 0, set to 0.
+            if (_needs.Energy < 0)
+            {
+                _needs.Energy = 0;
+            }
         }
 
-        private float CalculateHunger(GameTime gameTime)
+        private void CalculateHunger(GameTime gameTime)
         {
-            float rate_of_change = _current_exertion_rate * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            
-            return rate_of_change;
+            float rate_of_change = _current_hunger_rate * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            _needs.Hunger += rate_of_change;
+
+            if (_needs.Hunger < 0)
+            {
+                _needs.Hunger = 0;
+            }
 
         }
 
-        private float CalculateThirst(GameTime gameTime)
+        private void CalculateThirst(GameTime gameTime)
         {
-            float amount = 0;
-            return amount;
+            float rate_of_change = _current_thirst_rate * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            rate_of_change += (_current_exertion_rate / 2) * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            _needs.Thirst += rate_of_change;
+
+            if (_needs.Thirst < 0)
+            {
+                _needs.Thirst = 0;
+            }
+        }
+
+        private void CalculateStress(GameTime gameTime)
+        {
+            float rate_of_change = _current_stress_rate * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _needs.Stress += rate_of_change;
+
+            if (_needs.Stress < 0)
+            {
+                _needs.Stress = 0;
+            }
 
         }
 
-        private float CalculateStress(GameTime gameTime)
-        {
-            float amount = 0;
-            return amount;
-
-        }
         public bool Update(GameTime gameTime)
         {
             Move(gameTime);
@@ -286,6 +358,7 @@ namespace BaseBuilder
         }
 
         /*Assigns the exertion rate for each different state. That is the rate at which the crew member get's tired.
+         * Perhaps we could read these values in from a database eventually.
          */
         private float GetExertionRate(State newState)
         {
@@ -371,6 +444,11 @@ namespace BaseBuilder
         {
             get { return _selected; }
             set { _selected = value; }
+        }
+        public string Activity
+        {
+            get { return _activity; }
+            set { _activity = value; }
         }
     }
 
