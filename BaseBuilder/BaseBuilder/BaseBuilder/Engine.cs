@@ -14,7 +14,7 @@ namespace BaseBuilder
     public class Engine : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
-        Color backColour = Color.FromNonPremultiplied(120, 120, 120, 255);
+        Color backColour = Color.FromNonPremultiplied(100, 100, 100, 255);
         SpriteBatch spriteBatch;
 
         // ############################################# //
@@ -25,8 +25,11 @@ namespace BaseBuilder
         Button button3;
         Button button4;
         Button button5;
+        Rectangle topBar;
+        Rectangle thickBar;
         Rectangle bottomBar;
         Texture2D sand;
+        Label clock;
 
         InternalObject test_object;
         public void Event_Test(GUIControl sender)
@@ -42,9 +45,7 @@ namespace BaseBuilder
         }
         public void Do_Beep(GUIControl sender)
         {
-            SoundEffectInstance sei = Audio.Get("click").CreateInstance();
-            //sei.Volume = (0.2f) / Settings.MasterVolume;
-            sei.Play();
+            Audio.Play("click");
         }
 
         // ##### THIS WILL GO INTO A UI CLASS LATER #### //
@@ -101,7 +102,6 @@ namespace BaseBuilder
             // Create the camera
             Camera.Create(GraphicsDevice.Viewport);
 
-
             //This should be loaded in from Save File. Hardcoded for now.
             World.CrewMembers.Add(new CrewMember("James", 23, 90, 60, "crew"));
             World.CrewMembers.Add(new CrewMember("John", 25, 250, 160, "crew"));
@@ -139,7 +139,6 @@ namespace BaseBuilder
             // Enable version display
             Version.Enable();
 
-
             // #### TESTING BELOW ####
             sand = Content.Load<Texture2D>("Textures/sand");
             Texture2D tex = Content.Load<Texture2D>("Textures/button");
@@ -169,6 +168,16 @@ namespace BaseBuilder
 
             int barSize = ((screen.Height - buttonSize) - buttomRoom) + (buttonSize / 2);
             bottomBar = new Rectangle(0, barSize, screen.Width, barSize);
+            topBar = new Rectangle(0, 0, screen.Width, 22);
+            thickBar = new Rectangle(0, 22, screen.Width, 2);
+
+            Vector2 clockPos = new Vector2(screen.Width / 2, 1);
+            clock = new Label("clock", "00:00", clockPos, Fonts.Standard, Color.White, 5, 0);
+
+            // Testing time by moving clock to when sun sets
+            World.Clock.SetClock(0, 0, 15, 55, 0);
+            // Speed clock up a bit
+            World.Clock.SetSpeed(ClockSpeed.SecondsToMinutes);
         }
 
         protected override void UnloadContent()
@@ -180,7 +189,8 @@ namespace BaseBuilder
         {
             Controls.Update();
             Camera.Update(gameTime);
-            World.Clock.Update(gameTime, ClockSpeed.RealTime);
+            World.Clock.Update(gameTime);
+            clock.Text = World.Clock.Time;
 
             if (Controls.Mouse.IsInCameraView()) // Don't do anything with the mouse if it's not in our cameras viewport.
             {
@@ -284,10 +294,9 @@ namespace BaseBuilder
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, Camera.Transform);
 
-            //spriteBatch.Draw(sand, sand.Bounds, Color.White);
-            spriteBatch.Draw(sand, new Rectangle(0,0, Constants.MAP_WIDTH * Constants.TILE_SIZE, Constants.MAP_HEIGHT * Constants.TILE_SIZE), Color.White);
-            bool showGrid = true;
+            spriteBatch.Draw(sand, new Rectangle(0,0, Constants.MAP_WIDTH * Constants.TILE_SIZE, Constants.MAP_HEIGHT * Constants.TILE_SIZE), World.Clock.AmbientLightFromTime);
 
+            bool showGrid = true;
             if (showGrid)
             {
                 for (int x = 0; x < Constants.MAP_WIDTH; x++)
@@ -317,7 +326,7 @@ namespace BaseBuilder
             {
                 //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
                 Rectangle re = new Rectangle((int)crew_member.Position.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)crew_member.Position.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
-                spriteBatch.Draw(Sprites.Get(crew_member.Sprite), re, Color.White);
+                spriteBatch.Draw(Sprites.Get(crew_member.Sprite), re, World.Clock.AmbientLightFromTime);
 
                 //If a crew member is selected then draw a circle around them.
                 if (crew_member.Selected)
@@ -374,19 +383,22 @@ namespace BaseBuilder
             foreach (InternalObject io in World.InternalObjects)
             { 
                 Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.Sprite).Width, Sprites.Get(io.Sprite).Height);
-                spriteBatch.Draw(Sprites.Get(io.Sprite), re2, Color.White);
+                spriteBatch.Draw(Sprites.Get(io.Sprite), re2, World.Clock.AmbientLightFromTime);
             }
 
             spriteBatch.End();
 
             // ##### TESTING #####
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            spriteBatch.Draw(Sprites.PIXEL, topBar, Color.Black * 0.75f);
             spriteBatch.Draw(Sprites.PIXEL, bottomBar, Color.Black * 0.75f);
+            spriteBatch.Draw(Sprites.PIXEL, thickBar, Color.Black);
             button1.Draw(spriteBatch);
             button2.Draw(spriteBatch);
             button3.Draw(spriteBatch);
             button4.Draw(spriteBatch);
             button5.Draw(spriteBatch);
+            clock.Draw(spriteBatch);
             spriteBatch.End();
             // ##################
 
