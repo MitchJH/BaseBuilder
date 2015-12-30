@@ -115,19 +115,16 @@ namespace BaseBuilder
                 _hours++;
             }
 
+            // A DAY HAS PASSED
             if (_hours >= 24)
             {
                 if (_minutes >= 37)
                 {
-                    if (_seconds >= 35)
-                    {
-                        // A DAY HAS PASSED
-                        _hours = _hours - 24;
-                        _minutes = _minutes - 37;
-                        _seconds = _seconds - 35;
-                        _days++;
-                        _sols++;
-                    }
+                    _hours = _hours - 24;
+                    _minutes = _minutes - 37;
+                    _seconds = _seconds - 35;
+                    _days++;
+                    _sols++;
                 }
             }
 
@@ -216,10 +213,23 @@ namespace BaseBuilder
         // SUNSET  - 16:00 - 4PM
         // DARK    - 18:00 - 6PM
 
+        public Color AmbientLightMath()
+        {
+            double midday = 12;
+            double m = _minutes / 60;
+            double h = _hours + m;
+
+            double z = Math.Cos((h - midday) * Math.PI / 12);
+            float b = (float)(0.2f + 0.8f * (z + 1.0) / 2.0);
+            _ambience = b;
+            return new Color(b, b, b, 1.0f);
+        }
+
         public Color AmbientLightFromTime
         {
             get
             {
+                return AmbientLightMath();
                 if (_hours >= 8 && _hours < 16) // 8AM - 3:59PM
                 {
                     // Fully Light
