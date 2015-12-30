@@ -16,6 +16,8 @@ namespace BaseBuilder
         GraphicsDeviceManager graphics;
         Color backColour = Color.FromNonPremultiplied(100, 100, 100, 255);
         SpriteBatch spriteBatch;
+        EntityCollider _entity_collider;
+        
 
         // ############################################# //
         // ######## EVERYTHING HERE NEEDS TO GO ######## //
@@ -110,6 +112,15 @@ namespace BaseBuilder
             //This should be loaded in from Save File. Hardcoded for now.
             World.InternalObjects.Add(new InternalObject("Blue Bed", "Indoor bed", "Bed", 1, new Vector2(12, 12), "bed", new Vector2(2, 3)));
 
+            //Initialize the EntityCollider
+            _entity_collider = new EntityCollider();
+
+            //Add all objects that can collide to the entity collider. Do this somewhere else later, and in real time as objects get added/removed from the world.
+            foreach(Entity e in World.CrewMembers)
+            {
+                _entity_collider.Add(e);
+            }
+
             base.Initialize();
         }
 
@@ -193,6 +204,8 @@ namespace BaseBuilder
             Camera.Update(gameTime);
             World.Clock.Update(gameTime);
             clock.Text = World.Clock.Time;
+
+            _entity_collider.Update(gameTime);
 
             if (Controls.Mouse.IsInCameraView()) // Don't do anything with the mouse if it's not in our cameras viewport.
             {

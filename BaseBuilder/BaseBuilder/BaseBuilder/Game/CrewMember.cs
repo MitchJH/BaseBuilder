@@ -10,8 +10,6 @@ namespace BaseBuilder
 {
     public class CrewMember : Entity
     {
-     
-
         private string _name;
         private int _age;
         private float _walk_speed;
@@ -24,7 +22,7 @@ namespace BaseBuilder
         private List<Trait> _traits;
 
         private string _sprite;
-
+        private Vector2 _destination;
 
         private enum State : byte { Idle = 0, Walking = 1, Running = 2, Sleeping = 3, Building = 4};
 
@@ -120,12 +118,29 @@ namespace BaseBuilder
             _current_thirst_rate = -0.25f;
             _current_stress_rate = -0.001f;
 
+            Width = 64;
+            Height = 64;
+
             _activity = "Idle";
+
 
             this.Destination = this.Position;
         }
 
+        public override void CollideFrom(Entity entity)
+        {
+            _activity = "Bumping into something";
+        }
 
+        public override void CollideTo(Entity entity)
+        {
+            _activity = "Something bumping into him";
+        }
+        public Vector2 Destination
+        {
+            get { return _destination; }
+            set { _destination = value; }
+        }
 
         public bool Move(GameTime gameTime)
         {
@@ -350,6 +365,8 @@ namespace BaseBuilder
 
         public bool Update(GameTime gameTime)
         {
+            base.Update();
+
             Move(gameTime);
             
             UpdateNeeds(gameTime);

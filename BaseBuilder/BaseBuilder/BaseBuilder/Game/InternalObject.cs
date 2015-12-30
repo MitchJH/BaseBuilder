@@ -18,7 +18,6 @@ namespace BaseBuilder
         private bool _interactable;     //Can crew interact with it.
 
         private string _sprite;         //filename of the sprite.
-        private Vector2 _tile_position; //The origin tile it is placed on.
         private Vector2 _dimensions;    //Dimensions in tile size.
 
         public InternalObject()
@@ -44,7 +43,7 @@ namespace BaseBuilder
             _object_id = object_id;
 
             //Position = position;
-            _tile_position = tile_position;
+            TilePosition = tile_position;
             _interactable = true;
             _sprite = sprite;
 
@@ -67,12 +66,12 @@ namespace BaseBuilder
             {
                 while (x > 0)
                 {
-                    World.Tiles[((int)_tile_position.X - 1) + x, ((int)_tile_position.Y - 1) + y].Type = TileType.Impassable;
+                    World.Tiles[((int)TilePosition.X - 1) + x, ((int)TilePosition.Y - 1) + y].Type = TileType.Impassable;
                     x--;
                 }
                 x = (int)_dimensions.X;
 
-                World.Tiles[((int)_tile_position.X - 1) + x, ((int)_tile_position.Y - 1) + y].Type = TileType.Impassable;
+                World.Tiles[((int)TilePosition.X - 1) + x, ((int)TilePosition.Y - 1) + y].Type = TileType.Impassable;
 
                 y--;
             }
@@ -83,10 +82,10 @@ namespace BaseBuilder
 
         public Vector2 DeterminePosition()
         {
-            if(_tile_position != null)
+            if (TilePosition != null)
             {
-                int x = (int)_tile_position.X * Constants.TILE_SIZE;
-                int y = (int)_tile_position.Y * Constants.TILE_SIZE;
+                int x = (int)TilePosition.X * Constants.TILE_SIZE;
+                int y = (int)TilePosition.Y * Constants.TILE_SIZE;
 
                 return new Vector2(x, y);
             }
@@ -97,6 +96,7 @@ namespace BaseBuilder
         }
         public bool Update(GameTime gameTime)
         {
+            base.Update();
             return true;
         }
 
