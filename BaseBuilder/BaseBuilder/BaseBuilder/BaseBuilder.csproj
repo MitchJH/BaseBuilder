@@ -80,6 +80,7 @@
     <Compile Include="Framework\Constants.cs" />
     <Compile Include="Framework\Fonts.cs" />
     <Compile Include="Framework\DebugCrewStats.cs" />
+    <Compile Include="Framework\GameStateManager.cs" />
     <Compile Include="Framework\GUI\Button.cs" />
     <Compile Include="Framework\GUI\CheckBox.cs" />
     <Compile Include="Framework\GUI\CircleButton.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="Framework\GUI\PictureBox.cs" />
     <Compile Include="Framework\GUI\RadioButton.cs" />
     <Compile Include="Framework\GUI\TextBox.cs" />
+    <Compile Include="Framework\Menus\MainMenu.cs" />
     <Compile Include="Framework\Pathfinding\PriorityQueue.cs" />
     <Compile Include="Framework\Pathfinding\SpatialAStar.cs" />
     <Compile Include="Framework\FrameRateCounter.cs" />

@@ -81,24 +81,21 @@ namespace BaseBuilder
             {
                 _seconds += elapsedTime;
             }
-            else
+            else if (_clockSpeed == ClockSpeed.MinutesPerSecond)
             {
-                if (_clockSpeed == ClockSpeed.SecondsToMinutes)
-                {
-                    _minutes += elapsedTime;
-                }
-                else if (_clockSpeed == ClockSpeed.MinutesToHours)
-                {
-                    _hours += elapsedTime;
-                }
-                else if (_clockSpeed == ClockSpeed.HoursToDays)
-                {
-                    _days += elapsedTime;
-                }
-                else if (_clockSpeed == ClockSpeed.DaysToYears)
-                {
-                    _years += elapsedTime;
-                }
+                _minutes += elapsedTime;
+            }
+            else if (_clockSpeed == ClockSpeed.HoursPerSecond)
+            {
+                _hours += elapsedTime;
+            }
+            else if (_clockSpeed == ClockSpeed.DaysPerSecond)
+            {
+                _days += elapsedTime;
+            }
+            else if (_clockSpeed == ClockSpeed.YearsPerSecond)
+            {
+                _years += elapsedTime;
             }
 
             if (_seconds >= 60)
@@ -294,9 +291,9 @@ namespace BaseBuilder
     public enum ClockSpeed
     {
         RealTime,
-        SecondsToMinutes,
-        MinutesToHours,
-        HoursToDays,
-        DaysToYears
+        MinutesPerSecond,
+        HoursPerSecond,
+        DaysPerSecond,
+        YearsPerSecond
     }
 }

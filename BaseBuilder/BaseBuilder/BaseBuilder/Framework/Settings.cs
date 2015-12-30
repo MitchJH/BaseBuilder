@@ -13,6 +13,7 @@ namespace BaseBuilder
         private static string appDataPath;
         // General Settings
         private static WindowMode _windowMode;
+        private static GameState _startingGameState;
         private static int _X_resolution;
         private static int _Y_resolution;
         private static int _window_width;
@@ -33,7 +34,9 @@ namespace BaseBuilder
             int screenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
             appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Constants.APP_DATA_GAME_NAME);
 
+            // General
             _windowMode = WindowMode.Fullscreen;
+            _startingGameState = GameState.MainMenu;
             _X_resolution = screenWidth;
             _Y_resolution = screenHeight;
             _X_windowPos = 0;
@@ -41,6 +44,7 @@ namespace BaseBuilder
             _mouseVisible = true;
             _fixedTimestep = false;
             _mouseScrolling = true;
+            // Audio
             _masterVolume = 1.0f;
             _effectVolume = 1.0f;
             _musicVolume = 0.5f;
@@ -58,6 +62,10 @@ namespace BaseBuilder
                     if (setting.StartsWith("window_mode"))
                     {
                         _windowMode = (WindowMode)Enum.Parse(typeof(WindowMode), value);
+                    }
+                    else if (setting.StartsWith("starting_game_state"))
+                    {
+                        _startingGameState = (GameState)Enum.Parse(typeof(GameState), value);
                     }
                     else if (setting.StartsWith("x_res"))
                     {
@@ -135,6 +143,7 @@ namespace BaseBuilder
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("# GENERAL SETTINGS");
             sb.AppendLine("window_mode " + _windowMode.ToString());
+            sb.AppendLine("starting_game_state " + _startingGameState.ToString() + " // MainMenu, Game, Exit");
             sb.AppendLine("x_res " + _X_resolution.ToString());
             sb.AppendLine("y_res " + _Y_resolution.ToString());
             sb.AppendLine("window_width " + _window_width.ToString());
@@ -182,6 +191,12 @@ namespace BaseBuilder
         {
             get { return Settings._windowMode; }
             set { Settings._windowMode = value; }
+        }
+
+        public static GameState StartingGameState
+        {
+            get { return Settings._startingGameState; }
+            set { Settings._startingGameState = value; }
         }
 
         public static int X_resolution
