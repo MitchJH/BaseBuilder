@@ -16,6 +16,7 @@ namespace BaseBuilder
         GraphicsDeviceManager graphics;
         Color backColour = Color.FromNonPremultiplied(100, 100, 100, 255);
         SpriteBatch spriteBatch;
+        EntityCollider _entity_collider;
 
         // Menus
         MainMenu mainMenu;
@@ -116,6 +117,15 @@ namespace BaseBuilder
             //This should be loaded in from Save File. Hardcoded for now.
             World.InternalObjects.Add(new InternalObject("Blue Bed", "Indoor bed", "Bed", 1, new Vector2(12, 12), "bed", new Vector2(2, 3)));
 
+            //Initialize the EntityCollider
+            _entity_collider = new EntityCollider();
+
+            //Add all objects that can collide to the entity collider. Do this somewhere else later, and in real time as objects get added/removed from the world.
+            foreach(Entity e in World.CrewMembers)
+            {
+                _entity_collider.Add(e);
+            }
+
             base.Initialize();
         }
 
@@ -200,98 +210,100 @@ namespace BaseBuilder
         {
             if (GameStateManager.State == GameState.Game)
             {
-                Controls.Update();
-                Camera.Update(gameTime);
-                World.Clock.Update(gameTime);
-                clock.Text = World.Clock.Time;
+            Controls.Update();
+            Camera.Update(gameTime);
+            World.Clock.Update(gameTime);
+            clock.Text = World.Clock.Time;
 
-                if (Controls.Mouse.IsInCameraView()) // Don't do anything with the mouse if it's not in our cameras viewport.
+            _entity_collider.Update(gameTime);
+
+            if (Controls.Mouse.IsInCameraView()) // Don't do anything with the mouse if it's not in our cameras viewport.
+            {
+                Vector2 mousePosition = new Vector2(Controls.Mouse.X, Controls.Mouse.Y);
+                mousePosition = Vector2.Transform(mousePosition, Camera.InverseTransform);
+
+                int x = (int)(mousePosition.X / Constants.TILE_SIZE);
+                int y = (int)(mousePosition.Y / Constants.TILE_SIZE);
+
+                this.Window.Title = "DEBUG - " +
+                    "(Mouse: " + (int)mousePosition.X + ":" + (int)mousePosition.Y + ") " +
+                    "(Tile: " + x + ":" + y + ") " +
+                    "(Camera Position:{X:" + Camera.Position.X.ToString("N2") + " " + Camera.Position.Y.ToString("N2") + "} - Zoom:" + Camera.Zoom.ToString("N3") + ") " +
+                    "(" + World.Clock.DebugText + ")";
+                
+                //Update crew in real time.
+                foreach (CrewMember c in World.CrewMembers)
                 {
-                    Vector2 mousePosition = new Vector2(Controls.Mouse.X, Controls.Mouse.Y);
-                    mousePosition = Vector2.Transform(mousePosition, Camera.InverseTransform);
+                    c.Update(gameTime);
+                }
 
-                    int x = (int)(mousePosition.X / Constants.TILE_SIZE);
-                    int y = (int)(mousePosition.Y / Constants.TILE_SIZE);
-
-                    this.Window.Title = "DEBUG - " +
-                        "(Mouse: " + (int)mousePosition.X + ":" + (int)mousePosition.Y + ") " +
-                        "(Tile: " + x + ":" + y + ") " +
-                        "(Camera Position:{X:" + Camera.Position.X.ToString("N2") + " " + Camera.Position.Y.ToString("N2") + "} - Zoom:" + Camera.Zoom.ToString("N3") + ") " +
-                        "(" + World.Clock.DebugText + ")";
-
-                    //Update crew in real time.
+                if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
+                {
                     foreach (CrewMember c in World.CrewMembers)
                     {
-                        c.Update(gameTime);
-                    }
-
-                    if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
-                    {
-                        foreach (CrewMember c in World.CrewMembers)
+                        //If the mouseposition is within the textures bounds of a crew member...
+                        //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
+                        if (mousePosition.X > c.Position.X - (Sprites.MISSING_TEXTURE.Bounds.Width / 2) && mousePosition.X < c.Position.X + (Sprites.MISSING_TEXTURE.Bounds.Width / 2))
                         {
-                            //If the mouseposition is within the textures bounds of a crew member...
-                            //This could be done radius based instead of texture bounds based to make it simpler, but might not work then for long rectangular objects such as solar panels or something.
-                            if (mousePosition.X > c.Position.X - (Sprites.MISSING_TEXTURE.Bounds.Width / 2) && mousePosition.X < c.Position.X + (Sprites.MISSING_TEXTURE.Bounds.Width / 2))
+                            if (mousePosition.Y > c.Position.Y - (Sprites.MISSING_TEXTURE.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (Sprites.MISSING_TEXTURE.Bounds.Height / 2))
                             {
-                                if (mousePosition.Y > c.Position.Y - (Sprites.MISSING_TEXTURE.Bounds.Height / 2) && mousePosition.Y < c.Position.Y + (Sprites.MISSING_TEXTURE.Bounds.Height / 2))
+                                //deselect any crew that are already selected.
+                                foreach (CrewMember cm in World.CrewMembers)
                                 {
-                                    //deselect any crew that are already selected.
-                                    foreach (CrewMember cm in World.CrewMembers)
+                                    if (cm.Selected)
                                     {
-                                        if (cm.Selected)
-                                        {
-                                            cm.Selected = false;
-                                        }
+                                        cm.Selected = false;
                                     }
-                                    //TODO: Some more formal UI class will need to handle when things are selected, not the object itself.
-                                    c.Selected = true;
-                                    active_selection = true;
-
-                                    Audio.PlaySoundEffect("high_beep");
-                                    Console.WriteLine(c.Name + " " + " has been selected");
-
-                                    break;
                                 }
-                            }
-                        }
-                    }
-                    else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.Keyboard.IsKeyDown(Keys.LeftControl))
-                    {
-                        if ((x < 0 || y < 0 || x >= Constants.MAP_WIDTH || y >= Constants.MAP_HEIGHT) == false)
-                        {
-                            World.Tiles[x, y].Type = TileType.Impassable;
-                        }
-                    }
-                    else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.MouseOld.RightButton == ButtonState.Released)
-                    {
-                        if (active_selection)
-                        {
-                            foreach (CrewMember cm in World.CrewMembers)
-                            {
-                                if (cm.Selected)
-                                {
-                                    Point start_location = new Point((int)cm.Position.X / Constants.TILE_SIZE, (int)cm.Position.Y / Constants.TILE_SIZE);
-                                    Point destination = new Point(x, y);
-                                    Console.WriteLine("Generating Path from point (" + start_location.X + "," + start_location.Y + ") to point (" + destination.X + "," + destination.Y + ")");
-                                    cm.DeterminePath(World.FindPath(start_location, destination));
-                                }
+                                //TODO: Some more formal UI class will need to handle when things are selected, not the object itself.
+                                c.Selected = true;
+                                active_selection = true;
+
+                                Audio.PlaySoundEffect("high_beep");
+                                Console.WriteLine(c.Name + " " + " has been selected");
+
+                                break;
                             }
                         }
                     }
                 }
+                else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.Keyboard.IsKeyDown(Keys.LeftControl))
+                {
+                    if ((x < 0 || y < 0 || x >= Constants.MAP_WIDTH || y >= Constants.MAP_HEIGHT) == false)
+                    {
+                        World.Tiles[x, y].Type = TileType.Impassable;
+                    }
+                }
+                else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.MouseOld.RightButton == ButtonState.Released)
+                {
+                    if (active_selection)
+                    {
+                        foreach (CrewMember cm in World.CrewMembers)
+                        {
+                            if (cm.Selected)
+                            {
+                                Point start_location = new Point((int)cm.Position.X / Constants.TILE_SIZE, (int)cm.Position.Y / Constants.TILE_SIZE);
+                                Point destination = new Point(x, y);
+                                Console.WriteLine("Generating Path from point (" + start_location.X + "," + start_location.Y + ") to point (" + destination.X + "," + destination.Y + ")");
+                                cm.DeterminePath(World.FindPath(start_location, destination));
+                            }
+                        }
+                    }
+                }
+            }
 
-                // ##### TESTING #####
-                button1.Update(Controls.Mouse, Controls.Keyboard);
-                button2.Update(Controls.Mouse, Controls.Keyboard);
-                button3.Update(Controls.Mouse, Controls.Keyboard);
-                button4.Update(Controls.Mouse, Controls.Keyboard);
-                button5.Update(Controls.Mouse, Controls.Keyboard);
-                // ###################
+            // ##### TESTING #####
+            button1.Update(Controls.Mouse, Controls.Keyboard);
+            button2.Update(Controls.Mouse, Controls.Keyboard);
+            button3.Update(Controls.Mouse, Controls.Keyboard);
+            button4.Update(Controls.Mouse, Controls.Keyboard);
+            button5.Update(Controls.Mouse, Controls.Keyboard);
+            // ###################
 
-                FrameRateCounter.Update(gameTime);
+            FrameRateCounter.Update(gameTime);
 
-                DebugCrewStats.Update(gameTime);
-                
+            DebugCrewStats.Update(gameTime);
+
                 // Check for exit.
                 if (Controls.Keyboard.IsKeyDown(Keys.Escape))
                 {
@@ -316,129 +328,129 @@ namespace BaseBuilder
         {
             if (GameStateManager.State == GameState.Game)
             {
-                GraphicsDevice.Clear(backColour);
-                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, Camera.Transform);
+            GraphicsDevice.Clear(backColour);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, Camera.Transform);
 
                 spriteBatch.Draw(sand, new Rectangle(0, 0, Constants.MAP_WIDTH * Constants.TILE_SIZE, Constants.MAP_HEIGHT * Constants.TILE_SIZE), World.Clock.AmbientLightFromTime);
 
-                bool showGrid = true;
-                if (showGrid)
+            bool showGrid = true;
+            if (showGrid)
+            {
+                for (int x = 0; x < Constants.MAP_WIDTH; x++)
                 {
-                    for (int x = 0; x < Constants.MAP_WIDTH; x++)
+                    for (int y = 0; y < Constants.MAP_HEIGHT; y++)
                     {
-                        for (int y = 0; y < Constants.MAP_HEIGHT; y++)
+                        Rectangle tileRectangle = new Rectangle(
+                            x * Constants.TILE_SIZE, y * Constants.TILE_SIZE,
+                            Constants.TILE_SIZE, Constants.TILE_SIZE);
+
+                        //spriteBatch.Draw(Sprites.Get(WORLD.Tiles[x, y].Texture, 0), tileRectangle, Color.White);
+
+                        if (World.Tiles[x, y].Type == TileType.Walkable)
                         {
-                            Rectangle tileRectangle = new Rectangle(
-                                x * Constants.TILE_SIZE, y * Constants.TILE_SIZE,
-                                Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                            //spriteBatch.Draw(Sprites.Get(WORLD.Tiles[x, y].Texture, 0), tileRectangle, Color.White);
-
-                            if (World.Tiles[x, y].Type == TileType.Walkable)
-                            {
-                                spriteBatch.DrawRectangle(tileRectangle, Color.Black * 0.3f, 1 / Camera.Zoom);
-                            }
-                            else
-                            {
-                                spriteBatch.FillRectangle(tileRectangle, Color.Black);
-                            }
+                            spriteBatch.DrawRectangle(tileRectangle, Color.Black * 0.3f, 1 / Camera.Zoom);
+                        }
+                        else
+                        {
+                            spriteBatch.FillRectangle(tileRectangle, Color.Black);
                         }
                     }
                 }
+            }
 
-                //Draw every crew members sprite.
-                foreach (CrewMember crew_member in World.CrewMembers)
+            //Draw every crew members sprite.
+            foreach (CrewMember crew_member in World.CrewMembers)
+            {
+                //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
+                Rectangle re = new Rectangle((int)crew_member.Position.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)crew_member.Position.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
+                spriteBatch.Draw(Sprites.Get(crew_member.Sprite), re, World.Clock.AmbientLightFromTime);
+
+                //If a crew member is selected then draw a circle around them.
+                if (crew_member.Selected)
                 {
-                    //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
-                    Rectangle re = new Rectangle((int)crew_member.Position.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)crew_member.Position.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
-                    spriteBatch.Draw(Sprites.Get(crew_member.Sprite), re, World.Clock.AmbientLightFromTime);
+                    spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen);
+                    
+                    //DEBUG: Display their needs.
+                    
 
-                    //If a crew member is selected then draw a circle around them.
-                    if (crew_member.Selected)
+                    //If a crew has a path then display it when they are selected.
+                    if (crew_member.Path.Count > 0)
                     {
-                        spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen);
-
-                        //DEBUG: Display their needs.
-
-
-                        //If a crew has a path then display it when they are selected.
-                        if (crew_member.Path.Count > 0)
+                        for (int i = 0; i < crew_member.Path.Count; i++)
                         {
-                            for (int i = 0; i < crew_member.Path.Count; i++)
+                            Rectangle tileRectangle = new Rectangle(
+                                crew_member.Path.ElementAt(i).Position.X * Constants.TILE_SIZE, crew_member.Path.ElementAt(i).Position.Y * Constants.TILE_SIZE,
+                                Constants.TILE_SIZE, Constants.TILE_SIZE);
+
+                            //spriteBatch.FillRectangle(tileRectangle, Color.DarkBlue);
+
+                            if (i + 1 < crew_member.Path.Count)
                             {
-                                Rectangle tileRectangle = new Rectangle(
-                                    crew_member.Path.ElementAt(i).Position.X * Constants.TILE_SIZE, crew_member.Path.ElementAt(i).Position.Y * Constants.TILE_SIZE,
-                                    Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                                //spriteBatch.FillRectangle(tileRectangle, Color.DarkBlue);
-
-                                if (i + 1 < crew_member.Path.Count)
-                                {
-                                    Tile thisTile = new Tile(crew_member.Path.ElementAt(i).Position.X, crew_member.Path.ElementAt(i).Position.Y);
-                                    Tile nextTile = new Tile(crew_member.Path.ElementAt(i + 1).Position.X, crew_member.Path.ElementAt(i + 1).Position.Y);
+                                Tile thisTile = new Tile(crew_member.Path.ElementAt(i).Position.X, crew_member.Path.ElementAt(i).Position.Y);
+                                Tile nextTile = new Tile(crew_member.Path.ElementAt(i + 1).Position.X, crew_member.Path.ElementAt(i + 1).Position.Y);
 
                                     spriteBatch.DrawLine(thisTile.Center, nextTile.Center, Color.White, 1 / Camera.Zoom);
-                                }
                             }
                         }
-
-                        /* This is probably just debug for now, but it's the code for drawing in the Red and Green Square for pathfinding.
-                         * 
-                         */
-                        if (crew_member.StartTile != Point.Zero)
-                        {
-                            Rectangle tileRectangle = new Rectangle(
-                                crew_member.StartTile.X * Constants.TILE_SIZE, crew_member.StartTile.Y * Constants.TILE_SIZE,
-                                Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                            spriteBatch.FillRectangle(tileRectangle, Color.Green);
-                        }
-                        if (crew_member.EndTile != Point.Zero)
-                        {
-                            Rectangle tileRectangle = new Rectangle(
-                                crew_member.EndTile.X * Constants.TILE_SIZE, crew_member.EndTile.Y * Constants.TILE_SIZE,
-                                Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                            spriteBatch.FillRectangle(tileRectangle, Color.Red);
-                        }
-
                     }
-                }
 
-                foreach (InternalObject io in World.InternalObjects)
-                {
-                    Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.Sprite).Width, Sprites.Get(io.Sprite).Height);
-                    spriteBatch.Draw(Sprites.Get(io.Sprite), re2, World.Clock.AmbientLightFromTime);
-                }
-
-                spriteBatch.End();
-
-                // ##### TESTING #####
-                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-                spriteBatch.Draw(Sprites.PIXEL, topBar, Color.Black * 0.75f);
-                spriteBatch.Draw(Sprites.PIXEL, bottomBar, Color.Black * 0.75f);
-                spriteBatch.Draw(Sprites.PIXEL, thickBar, Color.Black);
-                button1.Draw(spriteBatch);
-                button2.Draw(spriteBatch);
-                button3.Draw(spriteBatch);
-                button4.Draw(spriteBatch);
-                button5.Draw(spriteBatch);
-                clock.Draw(spriteBatch);
-                spriteBatch.End();
-                // ##################
-
-                // ##### FOR DEBUG #####
-                foreach (CrewMember crew in World.CrewMembers)
-                {
-                    if (crew.Selected)
+                    /* This is probably just debug for now, but it's the code for drawing in the Red and Green Square for pathfinding.
+                     * 
+                     */
+                    if (crew_member.StartTile != Point.Zero)
                     {
-                        DebugCrewStats.Draw(spriteBatch, crew);
-                    }
-                }
-                // #####################
+                        Rectangle tileRectangle = new Rectangle(
+                            crew_member.StartTile.X * Constants.TILE_SIZE, crew_member.StartTile.Y * Constants.TILE_SIZE,
+                            Constants.TILE_SIZE, Constants.TILE_SIZE);
 
-                FrameRateCounter.Draw(spriteBatch);
-                Version.Draw(spriteBatch);
+                        spriteBatch.FillRectangle(tileRectangle, Color.Green);
+                    }
+                    if (crew_member.EndTile != Point.Zero)
+                    {
+                        Rectangle tileRectangle = new Rectangle(
+                            crew_member.EndTile.X * Constants.TILE_SIZE, crew_member.EndTile.Y * Constants.TILE_SIZE,
+                            Constants.TILE_SIZE, Constants.TILE_SIZE);
+
+                        spriteBatch.FillRectangle(tileRectangle, Color.Red);
+                    }
+
+                }
+            }
+
+            foreach (InternalObject io in World.InternalObjects)
+            { 
+                Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.Sprite).Width, Sprites.Get(io.Sprite).Height);
+                spriteBatch.Draw(Sprites.Get(io.Sprite), re2, World.Clock.AmbientLightFromTime);
+            }
+
+            spriteBatch.End();
+
+            // ##### TESTING #####
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            spriteBatch.Draw(Sprites.PIXEL, topBar, Color.Black * 0.75f);
+            spriteBatch.Draw(Sprites.PIXEL, bottomBar, Color.Black * 0.75f);
+            spriteBatch.Draw(Sprites.PIXEL, thickBar, Color.Black);
+            button1.Draw(spriteBatch);
+            button2.Draw(spriteBatch);
+            button3.Draw(spriteBatch);
+            button4.Draw(spriteBatch);
+            button5.Draw(spriteBatch);
+            clock.Draw(spriteBatch);
+            spriteBatch.End();
+            // ##################
+
+            // ##### FOR DEBUG #####
+            foreach (CrewMember crew in World.CrewMembers)
+            {
+                    if (crew.Selected)
+                {
+                    DebugCrewStats.Draw(spriteBatch, crew);
+                }
+            }
+            // #####################
+
+            FrameRateCounter.Draw(spriteBatch);
+            Version.Draw(spriteBatch);
             }
             else if (GameStateManager.State == GameState.MainMenu)
             {

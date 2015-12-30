@@ -8,36 +8,85 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BaseBuilder
 {
-    public class Entity
+    public class Entity : Node
     {
-        private Vector2 _position;
-        private Vector2 _destination;
-
-        public int _waypoint = 0;
-
+        public int _waypoint;
         private bool _selected;
+
+        private float _width;
+        private float _height;
+        private float _radius;
+
+        private string _type;
+
         public Entity()
         {
+            _width = 0;
+            _height = 0;
+            _radius = 0;
+            _type = "No type defined. Make sure to define the type when creating the Entity.";
         }
 
-        public Vector2 Position
+        public virtual void CollideFrom(Entity entity)
         {
-            get { return _position; }
-            set { _position = value; }
+            int x = 0;
         }
 
-        public Vector2 Destination
+        public virtual void CollideTo(Entity entity)
         {
-            get { return _destination; }
-            set { _destination = value; }
+            int x = 0;
         }
+
+        public void Update()
+        {
+            base.Update();
+        }
+
+        /*Get the radius of the entity. If the height and width are different the radius isn't determined and just the (width / 2) is returned.
+         */
+        public float GetRadius()
+        {
+            float w = _width / 2;
+            float h = _height / 2;
+
+            if (w == h)
+            {
+                return w;
+            }
+            else
+            {
+                return w;
+                Console.WriteLine("The width and height of this Entity (" + _type + ") are not the same, so it doesn't have a set radius. Value set to (width/2)");
+            }
+        }
+
+        public float Width
+        {
+            get { return _width; }
+            set { _width = value; }
+        }
+
+        public float Height
+        {
+            get { return _height; }
+            set { _height = value; }
+        }
+        public string Type
+        {
+            get { return _type; }
+            set { _type = value; }
+        }   
+
         public bool Selected
         {
             get { return _selected; }
             set { _selected = value; }
         }
-        public Facing Facing
-        {
+
+
+        /*
+         * public Facing Facing
+       
             // DOWN = 0 / 1
             // UP = 0 / -1
             // RIGHT = 1 / 0
@@ -89,7 +138,7 @@ namespace BaseBuilder
                     return BaseBuilder.Facing.Front;
                 }
             }
-        }
+        }*/
     }
 
     public enum Facing
