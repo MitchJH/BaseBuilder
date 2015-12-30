@@ -190,7 +190,7 @@ namespace BaseBuilder
             if (_path == null)
             {
                 Console.WriteLine("No path found, resetting tiles.");
-                Audio.Play("low_double_beep");
+                Audio.PlaySoundEffect("low_double_beep");
 
                 _path = new LinkedList<Tile>();
                 _startTile = Point.Zero;
@@ -199,7 +199,7 @@ namespace BaseBuilder
             else
             {
                 Console.WriteLine(" 'On my way!' ");
-                Audio.Play("high_double_beep");
+                Audio.PlaySoundEffect("high_double_beep");
                
                 _waypoint = 0;
                 Destination = new Vector2(path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);

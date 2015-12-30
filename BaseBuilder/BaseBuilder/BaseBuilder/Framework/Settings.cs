@@ -11,6 +11,7 @@ namespace BaseBuilder
     public static class Settings
     {
         private static string appDataPath;
+        // General Settings
         private static WindowMode _windowMode;
         private static int _X_resolution;
         private static int _Y_resolution;
@@ -21,7 +22,10 @@ namespace BaseBuilder
         private static bool _mouseVisible;
         private static bool _fixedTimestep;
         private static bool _mouseScrolling;
+        // Audio Settings
         private static float _masterVolume;
+        private static float _effectVolume;
+        private static float _musicVolume;
 
         static Settings()
         {
@@ -38,13 +42,15 @@ namespace BaseBuilder
             _fixedTimestep = false;
             _mouseScrolling = true;
             _masterVolume = 1.0f;
+            _effectVolume = 1.0f;
+            _musicVolume = 0.5f;
         }
 
         private static void ParseSettings(List<string> settings)
         {
             foreach (string setting in settings)
             {
-                if (setting.StartsWith("#") == false)
+                if (setting.StartsWith("#") == false && string.IsNullOrEmpty(setting) == false)
                 {
                     string[] split = setting.Split(' ');
                     string value = split[1];
@@ -91,8 +97,15 @@ namespace BaseBuilder
                     }
                     else if (setting.StartsWith("master_volume"))
                     {
-                        _masterVolume = float.Parse(value);
-                        _masterVolume = MathHelper.Clamp(_masterVolume, 0.0f, 1.0f);
+                        _masterVolume = MathHelper.Clamp(float.Parse(value), 0.0f, 1.0f);
+                    }
+                    else if (setting.StartsWith("effect_volume"))
+                    {
+                        _effectVolume = MathHelper.Clamp(float.Parse(value), 0.0f, 1.0f);
+                    }
+                    else if (setting.StartsWith("music_volume"))
+                    {
+                        _musicVolume = MathHelper.Clamp(float.Parse(value), 0.0f, 1.0f);
                     }
                 }
             }
@@ -114,6 +127,42 @@ namespace BaseBuilder
             {
                 Directory.CreateDirectory(appDataPath);
             }
+        }
+
+        public static void WriteToFile()
+        {
+            // Collect settings text
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("# GENERAL SETTINGS");
+            sb.AppendLine("window_mode " + _windowMode.ToString());
+            sb.AppendLine("x_res " + _X_resolution.ToString());
+            sb.AppendLine("y_res " + _Y_resolution.ToString());
+            sb.AppendLine("window_width " + _window_width.ToString());
+            sb.AppendLine("window_height " + _window_height.ToString());
+            sb.AppendLine("x_pos " + _X_windowPos.ToString());
+            sb.AppendLine("y_pos " + _Y_windowPos.ToString());
+            sb.AppendLine("mouse_visible " + _mouseVisible.ToString());
+            sb.AppendLine("fixed_timestep " + _fixedTimestep.ToString());
+            sb.AppendLine("mouse_scrolling " + _mouseScrolling.ToString());
+            sb.AppendLine("");
+            sb.AppendLine("# AUDIO SETTINGS");
+            sb.AppendLine("master_volume " + _masterVolume.ToString("N2"));
+            sb.AppendLine("effect_volume " + _effectVolume.ToString("N2"));
+            sb.AppendLine("music_volume " + _musicVolume.ToString("N2"));            
+
+            if (Directory.Exists(appDataPath) == false)
+            {
+                Directory.CreateDirectory(appDataPath);
+            }
+            
+            string file = Path.Combine(appDataPath, @"Settings.txt");
+
+            if (File.Exists(file))
+            {
+                File.Delete(file);
+            }
+
+            File.WriteAllText(file, sb.ToString());
         }
 
         public static void ParseCommandLineArguments(string[] args)
@@ -193,6 +242,18 @@ namespace BaseBuilder
         {
             get { return Settings._masterVolume; }
             set { Settings._masterVolume = value; }
+        }
+
+        public static float EffectVolume
+        {
+            get { return Settings._effectVolume; }
+            set { Settings._effectVolume = value; }
+        }
+
+        public static float MusicVolume
+        {
+            get { return Settings._musicVolume; }
+            set { Settings._musicVolume = value; }
         }
     }
 

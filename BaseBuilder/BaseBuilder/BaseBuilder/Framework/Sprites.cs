@@ -49,7 +49,7 @@ namespace BaseBuilder
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        if (line.StartsWith("#") == false)
+                        if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
                         {
                             string[] split = line.Split(',');
                             string id = split[0];

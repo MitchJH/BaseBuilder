@@ -10,10 +10,8 @@ namespace BaseBuilder
 {
     public enum TileType
     {
-        Empty,  // Martian soil
-        Floor,  // Inside a building
-        Wall,   // Wall of a building
-        Cliff   // Impassable martian terrain
+        Walkable,  // Walkable
+        Impassable   // Impassable
     }
 
     public class Tile : IPathNode<Object>
@@ -33,7 +31,7 @@ namespace BaseBuilder
         
         public bool IsWalkable(Object unused)
         {
-            if (_type == TileType.Empty)
+            if (_type == TileType.Walkable)
             {
                 return true;
             }            

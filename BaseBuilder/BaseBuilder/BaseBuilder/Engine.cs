@@ -30,8 +30,6 @@ namespace BaseBuilder
         Rectangle bottomBar;
         Texture2D sand;
         Label clock;
-
-        InternalObject test_object;
         public void Event_Test(GUIControl sender)
         {
             Random rand = new Random();
@@ -41,11 +39,11 @@ namespace BaseBuilder
                 CrewMember newCrew = new CrewMember("test" + i, 20 + i, rand.Next(10, 800), rand.Next(10, 500), "crew");
                 World.CrewMembers.Add(newCrew);
             }
-            Audio.Play("low_double_beep");
+            Audio.PlaySoundEffect("low_double_beep");
         }
         public void Do_Beep(GUIControl sender)
         {
-            Audio.Play("click");
+            Audio.PlaySoundEffect("click");
         }
 
         // ##### THIS WILL GO INTO A UI CLASS LATER #### //
@@ -178,11 +176,15 @@ namespace BaseBuilder
             World.Clock.SetClock(0, 0, 15, 55, 0);
             // Speed clock up a bit
             World.Clock.SetSpeed(ClockSpeed.SecondsToMinutes);
+
+            // Test music
+            MediaPlayer.IsRepeating = true;
+            Audio.PlayMusicTrack("background");
         }
 
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+            Settings.WriteToFile();
         }
 
         protected override void Update(GameTime gameTime)
@@ -234,7 +236,7 @@ namespace BaseBuilder
                                 c.Selected = true;
                                 active_selection = true;
 
-                                Audio.Play("high_beep");
+                                Audio.PlaySoundEffect("high_beep");
                                 Console.WriteLine(c.Name + " " + " has been selected");
 
                                 break;
@@ -246,7 +248,7 @@ namespace BaseBuilder
                 {
                     if ((x < 0 || y < 0 || x >= Constants.MAP_WIDTH || y >= Constants.MAP_HEIGHT) == false)
                     {
-                        World.Tiles[x, y].Type = TileType.Cliff;
+                        World.Tiles[x, y].Type = TileType.Impassable;
                     }
                 }
                 else if (Controls.Mouse.RightButton == ButtonState.Pressed && Controls.MouseOld.RightButton == ButtonState.Released)
@@ -309,7 +311,7 @@ namespace BaseBuilder
 
                         //spriteBatch.Draw(Sprites.Get(WORLD.Tiles[x, y].Texture, 0), tileRectangle, Color.White);
 
-                        if (World.Tiles[x, y].Type == TileType.Empty)
+                        if (World.Tiles[x, y].Type == TileType.Walkable)
                         {
                             spriteBatch.DrawRectangle(tileRectangle, Color.Black * 0.3f, 1 / Camera.Zoom);
                         }

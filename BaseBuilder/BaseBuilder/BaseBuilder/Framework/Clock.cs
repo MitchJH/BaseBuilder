@@ -195,8 +195,8 @@ namespace BaseBuilder
             {
                 return "Year: " + _years.ToString("N0") +
                     " / Day: " + _days.ToString("N0") +
-                    " / Hour: " + _hours.ToString("N0") +
-                    " / Minute: " + _minutes.ToString("N0") +
+                    //" / Hour: " + _hours.ToString("N0") +
+                    //" / Minute: " + _minutes.ToString("N0") +
                     //" / Second: " + _seconds.ToString("N0") +
                     //" / Season: " + _season.ToString() +
                     " / Light: " + _ambience.ToString("N2") + " - " + _ambiencePercentage.ToString("N2") + "%";

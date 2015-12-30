@@ -1,5 +1,7 @@
-# ID, Filepath
-high_beep,Audio/high_beep
-high_double_beep,Audio/high_double_beep
-low_double_beep,Audio/low_double_beep
-click,Audio/click
+# SOUND EFFECTS
+high_beep,Audio/high_beep,effect
+high_double_beep,Audio/high_double_beep,effect
+low_double_beep,Audio/low_double_beep,effect
+click,Audio/click,effect
+# MUSIC TRACKS
+background,Audio/Music/background,music

@@ -105,7 +105,7 @@ namespace BaseBuilder
             // Exit the function now if the ray length is 0
             if (rayLength == 0)
             {
-                result.DoCollide = _tiles[(int)position.X, (int)position.Y].Type == TileType.Empty;
+                result.DoCollide = _tiles[(int)position.X, (int)position.Y].Type == TileType.Walkable;
                 result.Position = position;
 
                 return result;
@@ -125,7 +125,7 @@ namespace BaseBuilder
                 while (true)
                 {
                     Vector2 rayPoint = rayLine[rayPointIndex];
-                    if (_tiles[(int)rayPoint.X, (int)rayPoint.Y].Type != TileType.Empty)
+                    if (_tiles[(int)rayPoint.X, (int)rayPoint.Y].Type != TileType.Walkable)
                     {
                         result.Position = rayPoint;
                         result.DoCollide = true;
@@ -208,7 +208,7 @@ namespace BaseBuilder
                 for (int y = 0; y < Constants.MAP_HEIGHT; y++)
                 {
                     _tiles[x, y] = new Tile(x, y);
-                    _tiles[x, y].Type = TileType.Empty;
+                    _tiles[x, y].Type = TileType.Walkable;
                 }
             }
         }

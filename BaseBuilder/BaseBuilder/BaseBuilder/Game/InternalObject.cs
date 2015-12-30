@@ -67,12 +67,12 @@ namespace BaseBuilder
             {
                 while (x > 0)
                 {
-                    World.Tiles[((int)_tile_position.X - 1) + x, ((int)_tile_position.Y - 1) + y].Type = TileType.Cliff;
+                    World.Tiles[((int)_tile_position.X - 1) + x, ((int)_tile_position.Y - 1) + y].Type = TileType.Impassable;
                     x--;
                 }
                 x = (int)_dimensions.X;
 
-                World.Tiles[((int)_tile_position.X - 1) + x, ((int)_tile_position.Y - 1) + y].Type = TileType.Cliff;
+                World.Tiles[((int)_tile_position.X - 1) + x, ((int)_tile_position.Y - 1) + y].Type = TileType.Impassable;
 
                 y--;
             }
