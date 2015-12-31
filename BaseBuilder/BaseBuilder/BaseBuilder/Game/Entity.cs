@@ -139,12 +139,4 @@ namespace BaseBuilder
             }
         }*/
     }
-
-    public enum Facing
-    {
-        Front,
-        Back,
-        Left,
-        Right
-    }
 }

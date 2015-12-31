@@ -24,6 +24,8 @@ namespace BaseBuilder
         // ############################################# //
         // ######## EVERYTHING HERE NEEDS TO GO ######## //
         // ############################################# //
+        PhysicsEntity physics_thing;
+
         Button button1;
         Button button2;
         Button button3;
@@ -114,7 +116,7 @@ namespace BaseBuilder
             World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
             World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
 
-            
+            physics_thing = new PhysicsEntity(new Vector2(100, 0));
 
             //Initialize the EntityCollider
             _entity_collider = new EntityCollider();
@@ -327,6 +329,25 @@ namespace BaseBuilder
                 Exit();
             }
 
+            physics_thing.Update(gameTime);
+
+            if (Controls.Keyboard.IsKeyDown(Keys.F))
+            {
+                physics_thing.ApplyForce(new Vector2(-1, 0));
+            }
+            if (Controls.Keyboard.IsKeyDown(Keys.T))
+            {
+                physics_thing.ApplyForce(new Vector2(0, -1));
+            }
+            if (Controls.Keyboard.IsKeyDown(Keys.H))
+            {
+                physics_thing.ApplyForce(new Vector2(1, 0));
+            }
+            if (Controls.Keyboard.IsKeyDown(Keys.G))
+            {
+                physics_thing.ApplyForce(new Vector2(0, 1));
+            }
+
             base.Update(gameTime);
         }
 
@@ -363,6 +384,7 @@ namespace BaseBuilder
                     }
                 }
             }
+            spriteBatch.DrawCircle(physics_thing.Position, 32, 20, Color.Red);
 
             //Draw every crew members sprite.
             foreach (CrewMember crew_member in World.CrewMembers)
