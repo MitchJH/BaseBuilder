@@ -20,6 +20,8 @@ namespace BaseBuilder
             _objectType = ObjectManager.GetType(objectType);
             base.TilePosition = tilePosition; // Set the tile position of the entity
             base.Position = new Vector2(tilePosition.X * Constants.TILE_SIZE, tilePosition.Y * Constants.TILE_SIZE);
+
+            OverwriteTiles();
         }
 
         /// <summary>
@@ -41,12 +43,12 @@ namespace BaseBuilder
             }
         }
 
-        /*
+        
         public bool OverwriteTiles()
         {
             //TODO: Scenario for rotating the object. Most likely this will just change the dimensions when rotated before it even comes to this method.
-            int x = (int)_dimensions.X;
-            int y = (int)_dimensions.Y;
+            int x = (int)_objectType.Width;
+            int y = (int)_objectType.Height;
 
             while (y > 0)
             {
@@ -55,7 +57,7 @@ namespace BaseBuilder
                     World.Tiles[((int)this.TilePosition.X - 1) + x, ((int)this.TilePosition.Y - 1) + y].Type = TileType.Impassable;
                     x--;
                 }
-                x = (int)_dimensions.X;
+                x = (int)_objectType.Width;
 
                 World.Tiles[((int)this.TilePosition.X - 1) + x, ((int)this.TilePosition.Y - 1) + y].Type = TileType.Impassable;
 
@@ -63,7 +65,7 @@ namespace BaseBuilder
             }
             return true;
         }
-        */
+        
 
         public string ID
         {
