@@ -99,6 +99,7 @@
     <Compile Include="Framework\Primitives2D.cs" />
     <Compile Include="Framework\Settings.cs" />
     <Compile Include="Framework\Version.cs" />
+    <Compile Include="Game\ObjectType.cs" />
     <Compile Include="Game\Node.cs" />
     <Compile Include="Game\EntityCollider.cs" />
     <Compile Include="Game\InternalObject.cs" />

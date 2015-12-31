@@ -29,12 +29,10 @@ namespace BaseBuilder
 
         public virtual void CollideFrom(Entity entity)
         {
-            int x = 0;
         }
 
         public virtual void CollideTo(Entity entity)
         {
-            int x = 0;
         }
 
         public void Update()
@@ -82,6 +80,7 @@ namespace BaseBuilder
             get { return _selected; }
             set { _selected = value; }
         }
+
 
 
         /*
