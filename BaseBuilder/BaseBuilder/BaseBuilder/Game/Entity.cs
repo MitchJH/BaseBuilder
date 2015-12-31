@@ -17,14 +17,11 @@ namespace BaseBuilder
         private float _height;
         private float _radius;
 
-        private string _type;
-
         public Entity()
         {
             _width = 0;
             _height = 0;
             _radius = 0;
-            _type = "No type defined. Make sure to define the type when creating the Entity.";
         }
 
         public virtual void CollideFrom(Entity entity)
@@ -54,7 +51,7 @@ namespace BaseBuilder
             else
             {
                 return w;
-                Console.WriteLine("The width and height of this Entity (" + _type + ") are not the same, so it doesn't have a set radius. Value set to (width/2)");
+                Console.WriteLine("The width and height of this Entity are not the same, so it doesn't have a set radius. Value set to (width/2)");
             }
         }
 
@@ -68,12 +65,7 @@ namespace BaseBuilder
         {
             get { return _height; }
             set { _height = value; }
-        }
-        public string Type
-        {
-            get { return _type; }
-            set { _type = value; }
-        }   
+        } 
 
         public bool Selected
         {

@@ -49,6 +49,11 @@ namespace BaseBuilder
         {
             Audio.PlaySoundEffect("click");
         }
+        public void Bed_Test(GUIControl sender)
+        {
+            ObjectManager.GetType("bed1").Sprite = "bed2";
+            Audio.PlaySoundEffect("low_double_beep");
+        }
 
         // ##### THIS WILL GO INTO A UI CLASS LATER #### //
         bool active_selection = false;
@@ -112,9 +117,7 @@ namespace BaseBuilder
             World.CrewMembers.Add(new CrewMember("John", 25, 250, 160, "crew"));
             World.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
             World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
-            World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
-
-            
+            World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));            
 
             //Initialize the EntityCollider
             _entity_collider = new EntityCollider();
@@ -145,12 +148,18 @@ namespace BaseBuilder
             // Load all sound effects
             Audio.LoadSoundBank("Content/Data/soundbank.txt", Content);
 
-            ObjectTypes.LoadObjectBank("Content/Data/objectbank.txt", Content);
+            // Load all object types
+            ObjectManager.LoadObjectBank("Content/Data/objectbank.txt", Content);
 
             //This should be loaded in from Save File. Hardcoded for now. Needs to be loaded after the ObjectBank is read.
-            World.InternalObjects.Add(new InternalObject(new Vector2(12, 12), "Bed"));
-            World.InternalObjects.Add(new InternalObject(new Vector2(20, 12), "Bloody Bed"));
-            World.InternalObjects.Add(new InternalObject(new Vector2(35, 22), "Small Bed"));
+            World.InternalObjects.Add(new GameObject("ID_1", "bed1", new Vector2(10, 10)));
+            World.InternalObjects.Add(new GameObject("ID_2", "bed1", new Vector2(20, 10)));
+            World.InternalObjects.Add(new GameObject("ID_3", "bed1", new Vector2(30, 10)));
+            World.InternalObjects.Add(new GameObject("ID_4", "bed1", new Vector2(40, 10)));
+            World.InternalObjects.Add(new GameObject("ID_5", "bed1", new Vector2(10, 20)));
+            World.InternalObjects.Add(new GameObject("ID_6", "bed1", new Vector2(20, 20)));
+            World.InternalObjects.Add(new GameObject("ID_7", "bed2", new Vector2(30, 20)));
+            World.InternalObjects.Add(new GameObject("ID_8", "bed3", new Vector2(40, 20)));
 
             // Enable the FPS counter
             FrameRateCounter.Enable();
@@ -186,7 +195,7 @@ namespace BaseBuilder
             button4.onMouseEnter += new EHandler(Do_Beep);
 
             button5 = new Button("testButton5", "\n\n\n\n\n\nMissions", new Rectangle(340, (screen.Height - buttonSize) - buttomRoom, buttonSize, buttonSize), tex, Fonts.Get("ButtonText"), Color.White);
-            button5.onClick += new EHandler(Event_Test);
+            button5.onClick += new EHandler(Bed_Test);
             button5.onMouseEnter += new EHandler(Do_Beep);
 
             int barSize = ((screen.Height - buttonSize) - buttomRoom) + (buttonSize / 2);
@@ -423,10 +432,10 @@ namespace BaseBuilder
                 }
             }
 
-            foreach (InternalObject io in World.InternalObjects)
+            foreach (GameObject io in World.InternalObjects)
             {
-                Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.Sprite).Width, Sprites.Get(io.Sprite).Height);
-                spriteBatch.Draw(Sprites.Get(io.Sprite), re2, World.Clock.AmbientLightFromTime);
+                Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.ObjectType.Sprite).Width, Sprites.Get(io.ObjectType.Sprite).Height);
+                spriteBatch.Draw(Sprites.Get(io.ObjectType.Sprite), re2, World.Clock.AmbientLightFromTime);
             }
 
             spriteBatch.End();

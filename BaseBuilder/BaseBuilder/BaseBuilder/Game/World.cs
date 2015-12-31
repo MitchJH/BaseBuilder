@@ -16,7 +16,7 @@ namespace BaseBuilder
         private static Tile[,] _tiles;
         private static Clock _clock;
         private static List<CrewMember> _crewMembers;
-        private static List<InternalObject> _internal_objects;
+        private static List<GameObject> _internal_objects;
         private static Planet _planet;
 
         static World()
@@ -24,7 +24,7 @@ namespace BaseBuilder
             _tiles = new Tile[Constants.MAP_WIDTH, Constants.MAP_HEIGHT];
             _clock = new Clock();
             _crewMembers = new List<CrewMember>();
-            _internal_objects = new List<InternalObject>();
+            _internal_objects = new List<GameObject>();
             EmptyMap();
         }
 
@@ -231,7 +231,7 @@ namespace BaseBuilder
             set { _crewMembers = value; }
         }
 
-        public static List<InternalObject> InternalObjects
+        public static List<GameObject> InternalObjects
         {
             get { return _internal_objects; }
             set { _internal_objects = value; }
