@@ -18,7 +18,7 @@ namespace BaseBuilder
             
         }
 
-        public bool Update()
+        public bool Update(GameTime gameTime)
         {
             return true;
         }

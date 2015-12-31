@@ -121,13 +121,19 @@ namespace BaseBuilder
             World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
             World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
 
-            physics_thing = new PhysicsEntity(new Vector2(100, 0));
-
+            World.PhysicsObjects.Add(new PhysicsEntity(new Vector2(0, 0), "ball", 64, 64));
+            World.PhysicsObjects.Add(new PhysicsEntity(new Vector2(100, 400), "ball", 64, 64));
+            World.PhysicsObjects.Add(new PhysicsEntity(new Vector2(200, 200), "ball", 64, 64));
+            
             //Initialize the EntityCollider
             _entity_collider = new EntityCollider();
 
             //Add all objects that can collide to the entity collider. Do this somewhere else later, and in real time as objects get added/removed from the world.
-            foreach(Entity e in World.CrewMembers)
+            foreach (PhysicsEntity e in World.CrewMembers)
+            {
+                _entity_collider.Add(e);
+            }
+            foreach(PhysicsEntity e in World.PhysicsObjects)
             {
                 _entity_collider.Add(e);
             }
@@ -255,6 +261,10 @@ namespace BaseBuilder
                 {
                     c.Update(gameTime);
                 }
+                foreach (PhysicsEntity pe in World.PhysicsObjects)
+                {
+                    pe.Update(gameTime);
+                }
 
                 if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                 {
@@ -340,23 +350,22 @@ namespace BaseBuilder
                 Exit();
             }
 
-            physics_thing.Update(gameTime);
 
             if (Controls.Keyboard.IsKeyDown(Keys.F))
             {
-                physics_thing.ApplyForce(new Vector2(-1, 0));
+                physics_thing.ApplyForce(new Vector2(-10, 0));
             }
             if (Controls.Keyboard.IsKeyDown(Keys.T))
             {
-                physics_thing.ApplyForce(new Vector2(0, -1));
+                physics_thing.ApplyForce(new Vector2(0, -10));
             }
             if (Controls.Keyboard.IsKeyDown(Keys.H))
             {
-                physics_thing.ApplyForce(new Vector2(1, 0));
+                physics_thing.ApplyForce(new Vector2(10, 0));
             }
             if (Controls.Keyboard.IsKeyDown(Keys.G))
             {
-                physics_thing.ApplyForce(new Vector2(0, 1));
+                physics_thing.ApplyForce(new Vector2(0, 10));
             }
 
             base.Update(gameTime);
@@ -395,7 +404,13 @@ namespace BaseBuilder
                     }
                 }
             }
-            spriteBatch.DrawCircle(physics_thing.Position, 32, 20, Color.Red);
+
+            foreach (PhysicsEntity pe in World.PhysicsObjects)
+            {
+                spriteBatch.DrawCircle(pe.Position, pe.GetRadius() , 20, Color.Red, 10);
+            }
+
+            
 
             //Draw every crew members sprite.
             foreach (CrewMember crew_member in World.CrewMembers)
@@ -407,7 +422,7 @@ namespace BaseBuilder
                 //If a crew member is selected then draw a circle around them.
                 if (crew_member.Selected)
                 {
-                    spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen);
+                    spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen, 2);
                     
                     //DEBUG: Display their needs.
                     

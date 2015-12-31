@@ -17,6 +17,7 @@ namespace BaseBuilder
         private static Clock _clock;
         private static List<CrewMember> _crewMembers;
         private static List<GameObject> _internal_objects;
+        private static List<PhysicsEntity> _physics_objects;
         private static Planet _planet;
 
         static World()
@@ -25,6 +26,7 @@ namespace BaseBuilder
             _clock = new Clock();
             _crewMembers = new List<CrewMember>();
             _internal_objects = new List<GameObject>();
+            _physics_objects = new List<PhysicsEntity>();
             EmptyMap();
         }
 
@@ -235,6 +237,12 @@ namespace BaseBuilder
         {
             get { return _internal_objects; }
             set { _internal_objects = value; }
+        }
+
+        public static List<PhysicsEntity> PhysicsObjects
+        {
+            get { return _physics_objects; }
+            set { _physics_objects = value; }
         }
 
         public static Planet Planet

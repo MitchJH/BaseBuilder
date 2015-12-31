@@ -10,22 +10,22 @@ namespace BaseBuilder
 {
     public class EntityCollider
     {
-        List<Entity> all_game_entities;
+        List<PhysicsEntity> all_game_entities;
 
         public EntityCollider()
         {
-            all_game_entities = new List<Entity>();
+            all_game_entities = new List<PhysicsEntity>();
         }
 
-        public void Add(Entity entity)
+        public void Add(PhysicsEntity entity)
         {
             all_game_entities.Add(entity);
         }
        
         public void Collide(GameTime gameTime)
         {
-            Entity collidee;
-            Entity collider;
+            PhysicsEntity collidee;
+            PhysicsEntity collider;
 
             for (int i = 0; i < all_game_entities.Count; i++)
             {

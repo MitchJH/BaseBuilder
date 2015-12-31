@@ -24,17 +24,17 @@ namespace BaseBuilder
             _radius = 0;
         }
 
-        public virtual void CollideFrom(Entity entity)
+        public virtual void CollideFrom(PhysicsEntity entity)
         {
         }
 
-        public virtual void CollideTo(Entity entity)
+        public virtual void CollideTo(PhysicsEntity entity)
         {
         }
 
-        public void Update()
+        public void Update(GameTime gameTime)
         {
-            base.Update();
+            base.Update(gameTime);
         }
 
         /*Get the radius of the entity. If the height and width are different the radius isn't determined and just the (width / 2) is returned.

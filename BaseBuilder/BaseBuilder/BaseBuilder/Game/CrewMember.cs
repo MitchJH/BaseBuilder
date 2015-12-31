@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BaseBuilder
 {
-    public class CrewMember : Entity
+    public class CrewMember : PhysicsEntity
     {
         private string _name;
         private int _age;
@@ -99,8 +99,8 @@ namespace BaseBuilder
             _stats.Agriculture = 0;
             _stats.Medicine = 0;
 
-            _walk_speed = 60;
-            _run_speed = 100;
+            _walk_speed = 500;
+            _run_speed = 1000;
 
             _traits = new List<Trait>();
 
@@ -127,13 +127,15 @@ namespace BaseBuilder
             this.Destination = this.Position;
         }
 
-        public override void CollideFrom(Entity entity)
+        public override void CollideFrom(PhysicsEntity entity)
         {
+            base.CollideFrom(entity);
             _activity = "Bumping into something";
         }
 
-        public override void CollideTo(Entity entity)
+        public override void CollideTo(PhysicsEntity entity)
         {
+            base.CollideFrom(entity);
             _activity = "Something bumping into him";
         }
         public Vector2 Destination
@@ -149,9 +151,12 @@ namespace BaseBuilder
             //The waypoint they move to is always at index 0 in the list.
             if (_path_waypoints.Count > 0)
             {
-                Vector2 direction = Vector2.Normalize(_path_waypoints[0] - this.Position);
-                this.Position += direction * (float)gameTime.ElapsedGameTime.TotalSeconds * _walk_speed;
+                Direction = Vector2.Normalize(_path_waypoints[0] - this.Position);
+                Vector2 force = new Vector2(0, 0);
+                force += Direction * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+                ApplyForce(force * _walk_speed);
+                
                 if (_current_state != (byte)State.Walking)
                 {
                     StateChange(State.Walking);
@@ -365,7 +370,7 @@ namespace BaseBuilder
 
         public bool Update(GameTime gameTime)
         {
-            base.Update();
+            base.Update(gameTime);
 
             Move(gameTime);
             

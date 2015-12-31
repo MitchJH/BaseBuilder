@@ -8,155 +8,133 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BaseBuilder
 {
-    public class PhysicsEntity : Node
+    public class PhysicsEntity : Entity
     {
-        public int _waypoint;
-        private bool _selected;
+        private string _type;               //What type of entity is it.
 
-        private float _width;
-        private float _height;
-        private float _radius;
-        private float _force;
+        private Vector2 _velocity;          //The velocity, directly impacts position every frame.
+        private Vector2 _acceleration;      //The acceleration. The rate of change applied to velocity every frame. Can be decceleration too.
+        private Vector2 _direction;         //The direction vector for the entity.
 
-        private string _type;
+        private float _resistance;          //The modifier to the force applied in the opposite direction to which the entity is moving.
 
-        Vector2 _velocity;
-        Vector2 _acceleration;
-        Vector2 _velocityi;
-        public PhysicsEntity(Vector2 position)
+        private bool _in_motion;            //Whether or not the entity is moving.
+
+        public PhysicsEntity()
         {
-            _width = 0;
-            _height = 0;
-            _radius = 0;
-            _type = "No type defined. Make sure to define the type when creating the Entity.";
+            _velocity = new Vector2(0, 0);
+            _acceleration = new Vector2(0, 0);
+            _direction = new Vector2(0, 0);
+
+            _resistance = 5;
+
+            _in_motion = false;
+        }
+
+        public PhysicsEntity(Vector2 position, string type, float width, float height)
+        {
+            _type = type;
 
             _velocity = new Vector2(0, 0);
-            _velocityi = new Vector2(0, 0);
-            _acceleration = new Vector2(0f, -9.81f);
+            _acceleration = new Vector2(0, 0);
+            _direction = new Vector2(0, 0);
+
+            _resistance = 5;
+
+            _in_motion = false;
+
             Position = position;
-            _force = 1;
+            Width = width;
+            Height = height;
 
         }
 
-        public virtual void CollideFrom(Entity entity)
+        public override void CollideFrom(PhysicsEntity entity)
         {
+            /*Vector2 collide = new Vector2(0,0);
+
+            collide = new Vector2((_direction.X * 10), (_direction.Y * 10));
+
+            collide = _acceleration * -1;
+
+            ApplyForce(_acceleration);*/
+
+            _velocity = entity.Velocity;
         }
 
-        public virtual void CollideTo(Entity entity)
+        public override void CollideTo(PhysicsEntity entity)
         {
+            _velocity = entity.Velocity;
         }
 
         public void Update(GameTime gameTime)
         {
-            _velocity += _acceleration * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            
-            Position += _velocity;
+            base.Update(gameTime);
 
-            if (_velocity.X != 0)
+            //If in motion, add acceleration to velocity and update position.
+            if (_in_motion)
             {
-                if (_velocity.X > 0)
+                _velocity += _acceleration * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                Position += _velocity;
+
+                //If the velocity has not reached 0, deccelerate in the direciton it's moving. Else, stop it.
+                if (_velocity != Vector2.Zero)
                 {
-                    _acceleration.X = _force * -1;
-                    if (_velocity.X < 0.03f)
-                    {
-                        _velocity = new Vector2(0.0f, _velocity.Y);
-                        _acceleration.X = 0;
-                    }
+                    _direction = Vector2.Normalize(_velocity);
+
+                    _acceleration = new Vector2((_direction.X * _resistance), (_direction.Y * _resistance));
+
+                    _acceleration = _acceleration * -1;
                 }
                 else
                 {
-                    _acceleration.X = _force;
-                    if (_velocity.X > 0.03f)
-                    {
-                        _velocity = new Vector2(0.0f, _velocity.Y);
-                        _acceleration.X = 0;
-                    }
+                    _in_motion = false;
+                }
+
+                //Cleanup the small velocity and decceleration values.
+                if (System.Math.Abs(_velocity.X) < 0.1f)
+                {
+                    _velocity = new Vector2(0.0f, Velocity.Y);
+                    _acceleration.X = 0;
+                }
+                if (System.Math.Abs(_velocity.Y) < 0.1f)
+                {
+                    _velocity = new Vector2(_velocity.X, 0.0f);
+                    _acceleration.Y = 0;
                 }
             }
-            if (_velocity.Y != 0)
-            {
-
-                if (_velocity.Y > 0)
-                {
-                    _acceleration.Y = _force * -1;
-                    if (_velocity.Y < 0.03f)
-                    {
-                        _velocity = new Vector2(_velocity.X, 0.0f);
-                        _acceleration.Y = 0;
-                    }
-                }
-                else
-                {
-                    _acceleration.Y = _force;
-                    if (_velocity.Y > 0.03f)
-                    {
-                        _velocity = new Vector2(_velocity.X, 0.0f);
-                        _acceleration.Y = 0;
-                    }
-                }
-            }
-
-            
-            
-
-            base.Update();
-
-
         }
 
         public void ApplyForce(Vector2 force)
         {
-            _acceleration = force;
+            _acceleration += force;
+            _in_motion = true;
         }
 
-        /*Get the radius of the entity. If the height and width are different the radius isn't determined and just the (width / 2) is returned.
-         */
-        public float GetRadius()
-        {
-            float w = _width / 2;
-            float h = _height / 2;
 
-            if (w == h)
-            {
-                return w;
-            }
-            else
-            {
-                return w;
-                Console.WriteLine("The width and height of this PhysicsEntity (" + _type + ") are not the same, so it doesn't have a set radius. Value set to (width/2)");
-            }
-        }
-
-        public float Width
-        {
-            get { return _width; }
-            set { _width = value; }
-        }
-
-        public float Height
-        {
-            get { return _height; }
-            set { _height = value; }
-        }
         public string Type
         {
             get { return _type; }
             set { _type = value; }
-        }   
-
-        public bool Selected
-        {
-            get { return _selected; }
-            set { _selected = value; }
         }
 
-    }
+        public Vector2 Velocity
+        {
+            get { return _velocity; }
+            set { _velocity = value; }
+        }
 
-    public enum Facing
-    {
-        Front,
-        Back,
-        Left,
-        Right
+        public Vector2 Direction
+        {
+            get { return _direction; }
+            set { _direction = value; }
+        }
+
+        public float Resistance
+        {
+            get { return _resistance; }
+            set { _resistance = value; }
+        } 
     }
 }
