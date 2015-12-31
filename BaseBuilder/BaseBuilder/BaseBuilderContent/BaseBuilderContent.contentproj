@@ -126,8 +126,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Textures\bed.png">
-      <Name>bed</Name>
+    <Compile Include="Textures\bed1.png">
+      <Name>bed1</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

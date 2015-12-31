@@ -1,4 +1,4 @@
-# ID, Description, type, interactable?, sprite name, Tile Dimesions X, Tile Dimensions Y
-Bed,Something to sleep on.,Bed,true,bed,2,3
-Bloody Bed,I wouldn't sleep on this.,Bed,false,bed2,2,3
-Small Bed,a bit small.,Bed,true,bed3,2,2
+# ID, Name, Description, Sprite, isInternal, isInteractable, Width, Height
+bed1,BedName1,Description1,bed1,true,true,2,3
+bed2,BedName2,Description2,bed2,true,true,2,3
+bed3,BedName3,Description3,bed3,true,true,2,2

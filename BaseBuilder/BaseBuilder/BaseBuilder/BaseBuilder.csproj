@@ -103,7 +103,7 @@
     <Compile Include="Game\ObjectTypes.cs" />
     <Compile Include="Game\Node.cs" />
     <Compile Include="Game\EntityCollider.cs" />
-    <Compile Include="Game\InternalObject.cs" />
+    <Compile Include="Game\Objects\GameObject.cs" />
     <Compile Include="Game\Entity.cs" />
     <Compile Include="Game\CrewMember.cs" />
     <Compile Include="Framework\Camera.cs" />
