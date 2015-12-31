@@ -114,8 +114,7 @@ namespace BaseBuilder
             World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
             World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
 
-            //This should be loaded in from Save File. Hardcoded for now.
-            World.InternalObjects.Add(new InternalObject(new Vector2(12, 12), "Bed"));
+            
 
             //Initialize the EntityCollider
             _entity_collider = new EntityCollider();
@@ -145,6 +144,13 @@ namespace BaseBuilder
 
             // Load all sound effects
             Audio.LoadSoundBank("Content/Data/soundbank.txt", Content);
+
+            ObjectTypes.LoadObjectBank("Content/Data/objectbank.txt", Content);
+
+            //This should be loaded in from Save File. Hardcoded for now. Needs to be loaded after the ObjectBank is read.
+            World.InternalObjects.Add(new InternalObject(new Vector2(12, 12), "Bed"));
+            World.InternalObjects.Add(new InternalObject(new Vector2(20, 12), "Bloody Bed"));
+            World.InternalObjects.Add(new InternalObject(new Vector2(35, 22), "Small Bed"));
 
             // Enable the FPS counter
             FrameRateCounter.Enable();
@@ -419,8 +425,8 @@ namespace BaseBuilder
 
             foreach (InternalObject io in World.InternalObjects)
             {
-                Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.ObjectType.Sprite).Width, Sprites.Get(io.ObjectType.Sprite).Height);
-                spriteBatch.Draw(Sprites.Get(io.ObjectType.Sprite), re2, World.Clock.AmbientLightFromTime);
+                Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.Sprite).Width, Sprites.Get(io.Sprite).Height);
+                spriteBatch.Draw(Sprites.Get(io.Sprite), re2, World.Clock.AmbientLightFromTime);
             }
 
             spriteBatch.End();

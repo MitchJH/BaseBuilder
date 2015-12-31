@@ -11,7 +11,17 @@ namespace BaseBuilder
     public class InternalObject : Entity
     {
         private int _object_id;         //A number assoiciated with the object should be unique to each object.
-        ObjectType _object_type;
+
+        private string[] _object_data;  //Holds all the data needed for this type of object.
+
+        private string _name;           //The name of the object displayed. "Chair, Bed"
+        private string _description;    //Describes what the object is. "Something you sit on"
+        private string _type;           //What type of object it is. 
+
+        private bool _interactable;     //Can crew interact with it.
+
+        private string _sprite;         //filename of the sprite.
+        private Vector2 _dimensions;    //Dimensions in tile size, could be done on the fly I suppose? Pretty easy calculation. Up to you to remove.
 
         public InternalObject(Vector2 tile_position, string object_type)
             : base()
@@ -20,18 +30,34 @@ namespace BaseBuilder
 
             Position = DeterminePosition();
 
-            _object_type = new ObjectType(object_type);
+            //Get the relevant data for this object.
+            _object_data = ObjectTypes.GetData(object_type);
+
+            //Break down the data and assign to variables.
+            ApplyData();
 
             //Overwrite the tiles it's being placed on.
             OverwriteTiles();
         }
 
+        public bool ApplyData()
+        {
+            _name = _object_data[0];
+            _description = _object_data[1];
+            _type = _object_data[2];
+            _interactable = bool.Parse(_object_data[3]);
+            _sprite = _object_data[4];
+            _dimensions.X = int.Parse(_object_data[5]);
+            _dimensions.Y = int.Parse(_object_data[6]);
+
+            return true;
+        }
 
         public bool OverwriteTiles()
         {
             //TODO: Scenario for rotating the object. Most likely this will just change the dimensions when rotated before it even comes to this method.
-            int x = (int)_object_type.Dimensions.X;
-            int y = (int)_object_type.Dimensions.Y;
+            int x = (int)Dimensions.X;
+            int y = (int)Dimensions.Y;
 
             while (y > 0)
             {
@@ -40,13 +66,13 @@ namespace BaseBuilder
                     World.Tiles[((int)TilePosition.X - 1) + x, ((int)TilePosition.Y - 1) + y].Type = TileType.Impassable;
                     x--;
                 }
-                x = (int)_object_type.Dimensions.X;
+                x = (int)Dimensions.X;
 
                 World.Tiles[((int)TilePosition.X - 1) + x, ((int)TilePosition.Y - 1) + y].Type = TileType.Impassable;
 
                 y--;
             }
-
+            
             return true;
 
         }
@@ -74,16 +100,36 @@ namespace BaseBuilder
             return true;
         }
 
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
+        }
+        public Vector2 Dimensions
+        {
+            get { return _dimensions; }
+            set { _dimensions = value; }
+        }
+        public string Description
+        {
+            get { return _description; }
+            set { _description = value; }
+        }
+        public string Type
+        {
+            get { return _type; }
+            set { _type = value; }
+        }
+        public string Sprite
+        {
+            get { return _sprite; }
+            set { _sprite = value; }
+        }
 
         public bool Draw()
         {
             return true;
         }
 
-        public ObjectType ObjectType
-        {
-            get { return _object_type; }
-            set { _object_type = value; }
-        }
     }
 }
