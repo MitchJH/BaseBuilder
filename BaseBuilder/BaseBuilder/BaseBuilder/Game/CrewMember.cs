@@ -18,7 +18,7 @@ namespace BaseBuilder
         private Country _country;
 
         private Needs _needs;
-        private Stats _stats;
+        private Skills _skills;
         private List<Trait> _traits;
 
         private string _sprite;
@@ -60,10 +60,10 @@ namespace BaseBuilder
             _needs.Thirst = 100;
             _needs.Stress = 100;
 
-            _stats.Fitness = 0;
-            _stats.Engineering = 0;
-            _stats.Agriculture = 0;
-            _stats.Medicine = 0;
+            _skills.Fitness = 0;
+            _skills.Engineering = 0;
+            _skills.Agriculture = 0;
+            _skills.Medicine = 0;
 
             _walk_speed = 60;
             _run_speed = 100;
@@ -94,10 +94,10 @@ namespace BaseBuilder
             _needs.Thirst = 100;
             _needs.Stress = 100;
 
-            _stats.Fitness = 0;
-            _stats.Engineering = 0;
-            _stats.Agriculture = 0;
-            _stats.Medicine = 0;
+            _skills.Fitness = 0;
+            _skills.Engineering = 0;
+            _skills.Agriculture = 0;
+            _skills.Medicine = 0;
 
             _walk_speed = 500;
             _run_speed = 1000;
@@ -133,10 +133,25 @@ namespace BaseBuilder
             _activity = "Collision detected.";
         }
 
-        public Vector2 Destination
+        public bool Update(GameTime gameTime)
         {
-            get { return _destination; }
-            set { _destination = value; }
+            base.Update(gameTime);
+
+            Move(gameTime);
+
+            UpdateNeeds(gameTime);
+
+            return true;
+        }
+
+        public bool Draw(SpriteBatch sb)
+        {
+            if (_path_waypoints.Count > 0)
+            {
+                for (int i = 0; i < _path_waypoints.Count; i++)
+                    sb.DrawCircle(_path_waypoints[i], 4, 10, Color.Yellow, 1.5f);
+            }
+            return true;
         }
 
         public bool Move(GameTime gameTime)
@@ -147,7 +162,9 @@ namespace BaseBuilder
             if (_path_waypoints.Count > 0)
             {
                 Direction = Vector2.Normalize(_path_waypoints[0] - this.Position);
+
                 Vector2 force = new Vector2(0, 0);
+
                 force += Direction * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                 ApplyForce(force * _walk_speed);
@@ -176,20 +193,7 @@ namespace BaseBuilder
                 }
             }
 
-            if (_path.Count > 0)
-            {
-                if (_waypoint + 1 < _path.Count)
-                {
-                    _waypoint++;
-                    
-                    Destination = new Vector2(_path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, _path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
-
-                    _path_waypoints.Add(new Vector2(Destination.X + (Constants.TILE_SIZE / 2), Destination.Y + (Constants.TILE_SIZE / 2)));
-
-                    //Debug
-                    //Console.WriteLine("added ("+ Destination.X + "," + Destination.Y + ") to the route.");
-                }
-            }
+            
 
             _endTile = new Point((int)Destination.X / Constants.TILE_SIZE, (int)Destination.Y / Constants.TILE_SIZE);
 
@@ -221,6 +225,52 @@ namespace BaseBuilder
                 
                 _startTile = start_location;
 
+                while (_waypoint + 1 < _path.Count)
+                {
+                    _waypoint++;
+
+                    Destination = new Vector2(_path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, _path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
+
+                    _path_waypoints.Add(new Vector2(Destination.X + (Constants.TILE_SIZE / 2), Destination.Y + (Constants.TILE_SIZE / 2)));
+
+                    //Debug
+                    //Console.WriteLine("added ("+ Destination.X + "," + Destination.Y + ") to the route.");
+                }
+
+                //Debug
+                Console.WriteLine("There are " + _path_waypoints.Count + " current waypoints calculated on the path.");
+                int waypoints_removed = 0;
+
+                //Node culling.
+                for (int i = 0; i < _path_waypoints.Count; i++)
+                {
+                    //If there is at least 2 waypoints.
+                    if (_path_waypoints.Count > i + 2)
+                    {
+                        //If the current waypoint is equal to the next waypoints X or Y axis. (Straight above or below, or to the right or left)
+                        if (_path_waypoints[i].X == _path_waypoints[i + 1].X || _path_waypoints[i].Y == _path_waypoints[i + 1].Y)
+                        {
+                            //If the current waypoint is equal to the next next waypoints X or Y axis. (Straight above or below, or to the right or left). This prevents removing the last node before a turn in direction.
+                            if (_path_waypoints[i].X == _path_waypoints[i + 2].X || _path_waypoints[i].Y == _path_waypoints[i + 2].Y)
+                            {
+                                //Remove the next waypoint.
+                                _path_waypoints.RemoveAt(i + 1);
+                                i = i - 1;
+                                waypoints_removed++;
+                            }
+                            
+                        }
+                        //TODO: Diagonal direction.
+                        else if (_path_waypoints[i].X + Constants.TILE_SIZE == _path_waypoints[i + 1].X && _path_waypoints[i].Y + Constants.TILE_SIZE == _path_waypoints[i + 1].Y)
+                        {
+                           // _path_waypoints.RemoveAt(i);
+                            //i = i - 1;
+                        }
+                    }
+                }
+
+                //Debug
+                Console.WriteLine("Removed " + waypoints_removed + ". There are now " + _path_waypoints.Count + " current waypoints calculated on the path.");
             }
 
             return true;
@@ -363,16 +413,7 @@ namespace BaseBuilder
 
         }
 
-        public bool Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
 
-            Move(gameTime);
-            
-            UpdateNeeds(gameTime);
-
-            return true;
-        }
 
         /*Assigns the exertion rate for each different state. That is the rate at which the crew member get's tired.
          * Perhaps we could read these values in from a database eventually.
@@ -422,10 +463,10 @@ namespace BaseBuilder
             set { _needs = value; }
         }
 
-        public Stats Stats
+        public Skills Skills
         {
-            get { return _stats; }
-            set { _stats = value; }
+            get { return _skills; }
+            set { _skills = value; }
         }
 
         public List<Trait> Traits
@@ -462,6 +503,12 @@ namespace BaseBuilder
             get { return _activity; }
             set { _activity = value; }
         }
+
+        public Vector2 Destination
+        {
+            get { return _destination; }
+            set { _destination = value; }
+        }
     }
 
     public struct Needs
@@ -473,7 +520,7 @@ namespace BaseBuilder
         public double Stress;
     }
 
-    public struct Stats
+    public struct Skills
     {
         public double Fitness;
         public double Engineering;

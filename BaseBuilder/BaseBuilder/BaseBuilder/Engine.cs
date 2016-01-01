@@ -390,6 +390,7 @@ namespace BaseBuilder
                     if (crew_member.Selected)
                     {
                         spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen, 2);
+                        
 
                         //DEBUG: Display their needs.
 
@@ -434,6 +435,8 @@ namespace BaseBuilder
 
                             spriteBatch.FillRectangle(tileRectangle, Color.Red);
                         }
+
+                        crew_member.Draw(spriteBatch);
 
                     }
                 }

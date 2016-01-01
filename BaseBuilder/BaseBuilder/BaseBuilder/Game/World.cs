@@ -84,6 +84,8 @@ namespace BaseBuilder
             return tempPath;
             LinkedList<Tile> truePath = new LinkedList<Tile>();
 
+            
+
             for (int i = 0; i < tempPath.Count; i++)
             {
                 Vector2 startPos = new Vector2(start.X, start.Y);
