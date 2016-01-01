@@ -24,7 +24,6 @@ namespace BaseBuilder
         // ############################################# //
         // ######## EVERYTHING HERE NEEDS TO GO ######## //
         // ############################################# //
-        PhysicsEntity physics_thing;
 
         Button button1;
         Button button2;
@@ -120,22 +119,17 @@ namespace BaseBuilder
             World.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
             World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
             World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
-
-            World.PhysicsObjects.Add(new PhysicsEntity(new Vector2(0, 0), "ball", 64, 64));
-            World.PhysicsObjects.Add(new PhysicsEntity(new Vector2(100, 400), "ball", 64, 64));
-            World.PhysicsObjects.Add(new PhysicsEntity(new Vector2(200, 200), "ball", 64, 64));
             
             //Initialize the EntityCollider
             _entity_collider = new EntityCollider();
 
             //Add all objects that can collide to the entity collider. Do this somewhere else later, and in real time as objects get added/removed from the world.
-            foreach (PhysicsEntity e in World.CrewMembers)
+            foreach (Entity e in World.CrewMembers)
             {
-                _entity_collider.Add(e);
-            }
-            foreach(PhysicsEntity e in World.PhysicsObjects)
-            {
-                _entity_collider.Add(e);
+                if (e.Dynamic)
+                {
+                    _entity_collider.Add(e);
+                }
             }
 
             base.Initialize();
@@ -262,10 +256,6 @@ namespace BaseBuilder
                     {
                         c.Update(gameTime);
                     }
-                    foreach (PhysicsEntity pe in World.PhysicsObjects)
-                    {
-                        pe.Update(gameTime);
-                    }
 
                     if (Controls.Mouse.LeftButton == ButtonState.Pressed && Controls.MouseOld.LeftButton == ButtonState.Released)
                     {
@@ -350,24 +340,6 @@ namespace BaseBuilder
                 Exit();
             }
 
-
-            if (Controls.Keyboard.IsKeyDown(Keys.F))
-            {
-                physics_thing.ApplyForce(new Vector2(-10, 0));
-            }
-            if (Controls.Keyboard.IsKeyDown(Keys.T))
-            {
-                physics_thing.ApplyForce(new Vector2(0, -10));
-            }
-            if (Controls.Keyboard.IsKeyDown(Keys.H))
-            {
-                physics_thing.ApplyForce(new Vector2(10, 0));
-            }
-            if (Controls.Keyboard.IsKeyDown(Keys.G))
-            {
-                physics_thing.ApplyForce(new Vector2(0, 10));
-            }
-
             base.Update(gameTime);
         }
 
@@ -403,11 +375,6 @@ namespace BaseBuilder
                             }
                         }
                     }
-                }
-
-                foreach (PhysicsEntity pe in World.PhysicsObjects)
-                {
-                    spriteBatch.DrawCircle(pe.Position, pe.GetRadius(), 20, Color.Red, 10);
                 }
 
 

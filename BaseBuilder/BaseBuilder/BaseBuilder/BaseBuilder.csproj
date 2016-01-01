@@ -101,7 +101,6 @@
     <Compile Include="Framework\Version.cs" />
     <Compile Include="Game\Objects\ObjectManager.cs" />
     <Compile Include="Game\Objects\ObjectTypes.cs" />
-    <Compile Include="Game\PhysicsEntity.cs" />
     <Compile Include="Game\Node.cs" />
     <Compile Include="Game\EntityCollider.cs" />
     <Compile Include="Game\Objects\GameObject.cs" />

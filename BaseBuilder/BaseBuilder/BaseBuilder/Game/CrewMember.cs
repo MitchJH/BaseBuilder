@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BaseBuilder
 {
-    public class CrewMember : PhysicsEntity
+    public class CrewMember : Entity
     {
         private string _name;
         private int _age;
@@ -79,7 +79,7 @@ namespace BaseBuilder
         }
 
         public CrewMember(string name, int age, float posX, float posY, string sprite)
-            : base()
+            : base(new Vector2(posX, posY), 64, 64, 64, true, name)
         {
             _name = name;
             _age = age;
@@ -127,17 +127,12 @@ namespace BaseBuilder
             this.Destination = this.Position;
         }
 
-        public override void CollideFrom(PhysicsEntity entity)
+        public override void Collide(Entity entity)
         {
-            base.CollideFrom(entity);
-            _activity = "Bumping into something";
+            base.Collide(entity);
+            _activity = "Collision detected.";
         }
 
-        public override void CollideTo(PhysicsEntity entity)
-        {
-            base.CollideFrom(entity);
-            _activity = "Something bumping into him";
-        }
         public Vector2 Destination
         {
             get { return _destination; }

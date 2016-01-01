@@ -18,7 +18,6 @@ namespace BaseBuilder
         private static List<CrewMember> _crewMembers;
         private static List<GameObject> _objects;
         private static List<GameStructure> _structures;
-        private static List<PhysicsEntity> _physics_objects;
         private static Planet _planet;
 
         static World()
@@ -28,7 +27,6 @@ namespace BaseBuilder
             _crewMembers = new List<CrewMember>();
             _objects = new List<GameObject>();
             _structures = new List<GameStructure>();
-            _physics_objects = new List<PhysicsEntity>();
             EmptyMap();
         }
 
@@ -251,12 +249,6 @@ namespace BaseBuilder
         {
             get { return World._structures; }
             set { World._structures = value; }
-        }
-
-        public static List<PhysicsEntity> PhysicsObjects
-        {
-            get { return _physics_objects; }
-            set { _physics_objects = value; }
         }
 
         public static Planet Planet

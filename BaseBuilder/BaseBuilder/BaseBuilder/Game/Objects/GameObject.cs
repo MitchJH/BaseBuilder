@@ -10,13 +10,12 @@ namespace BaseBuilder
 {
     public class GameObject : Entity
     {
-        private string _ID; // The unique identifier of this object
         private ObjectType _objectType; // What type of object this is
 
-        public GameObject(string ID, string objectType, Vector2 tilePosition)
+        public GameObject(string id, string objectType, Vector2 tilePosition)
             : base()
         {
-            _ID = ID;
+            ID = id;
             _objectType = ObjectManager.GetType(objectType);
             base.TilePosition = tilePosition; // Set the tile position of the entity
             base.Position = new Vector2(tilePosition.X * Constants.TILE_SIZE, tilePosition.Y * Constants.TILE_SIZE);
@@ -45,13 +44,7 @@ namespace BaseBuilder
             }
             return true;
         }
-        
-
-        public string ID
-        {
-            get { return _ID; }
-            set { _ID = value; }
-        }
+       
 
         public ObjectType ObjectType
         {

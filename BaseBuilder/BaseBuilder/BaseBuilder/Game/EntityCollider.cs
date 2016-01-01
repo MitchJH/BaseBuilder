@@ -10,22 +10,22 @@ namespace BaseBuilder
 {
     public class EntityCollider
     {
-        List<PhysicsEntity> all_game_entities;
+        List<Entity> all_game_entities;
 
         public EntityCollider()
         {
-            all_game_entities = new List<PhysicsEntity>();
+            all_game_entities = new List<Entity>();
         }
 
-        public void Add(PhysicsEntity entity)
+        public void Add(Entity entity)
         {
             all_game_entities.Add(entity);
         }
        
         public void Collide(GameTime gameTime)
         {
-            PhysicsEntity collidee;
-            PhysicsEntity collider;
+            Entity collidee;
+            Entity collider;
 
             for (int i = 0; i < all_game_entities.Count; i++)
             {
@@ -37,24 +37,21 @@ namespace BaseBuilder
 
                     if(collider != collidee)
                     {
-
                         Vector2 collidee_center = new Vector2(collidee.Position.X + collidee.Width, collidee.Position.Y + collidee.Height);
                         Vector2 collider_center = new Vector2(collider.Position.X + collider.Width, collider.Position.Y + collider.Height);
 
-                        float r = collider.GetRadius() + collidee.GetRadius();
+                        float r = collider.Radius + collidee.Radius;
                         Vector2 offset = collidee_center - collider_center;
                         float lensqr = offset.LengthSquared();
 
                         if (lensqr < r * r)
                         {                            
-                            collider.CollideTo(collidee);
-                            collidee.CollideFrom(collider);
+                            collider.Collide(collidee);
+                            collidee.Collide(collider);
                         }
                     }
-
                 }
             }
-
         }
 
         public void Update(GameTime gameTime)
