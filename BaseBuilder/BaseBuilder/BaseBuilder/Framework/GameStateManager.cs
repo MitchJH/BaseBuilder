@@ -23,7 +23,7 @@ namespace BaseBuilder
 
     public enum GameState
     {
-        Game,
+        GameWorld,
         MainMenu,
         Exit
     }

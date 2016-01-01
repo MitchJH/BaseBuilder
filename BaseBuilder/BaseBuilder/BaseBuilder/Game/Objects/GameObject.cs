@@ -23,26 +23,6 @@ namespace BaseBuilder
 
             OverwriteTiles();
         }
-
-        /// <summary>
-        /// Determine the position based on the tile.
-        /// </summary>
-        /// <returns>The X/Y position of the object</returns>
-        public Vector2 DeterminePosition()
-        {
-            if (this.TilePosition != null)
-            {
-                int x = (int)this.TilePosition.X * Constants.TILE_SIZE;
-                int y = (int)this.TilePosition.Y * Constants.TILE_SIZE;
-
-                return new Vector2(x, y);
-            }
-            else
-            {
-                return new Vector2(0, 0);
-            }
-        }
-
         
         public bool OverwriteTiles()
         {
@@ -73,11 +53,6 @@ namespace BaseBuilder
             set { _ID = value; }
         }
 
-        public ObjectType Type
-        {
-            get { return _objectType; }
-            set { _objectType = value; }
-        }
         public ObjectType ObjectType
         {
             get { return _objectType; }

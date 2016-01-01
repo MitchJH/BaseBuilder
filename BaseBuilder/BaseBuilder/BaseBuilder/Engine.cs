@@ -161,15 +161,18 @@ namespace BaseBuilder
             // Load all object types
             ObjectManager.LoadObjectBank("Content/Data/objectbank.txt", Content);
 
+            // Load all structure types
+            StructureManager.LoadStructureBank("Content/Data/structurebank.txt", Content);
+
             //This should be loaded in from Save File. Hardcoded for now. Needs to be loaded after the ObjectBank is read.
-            World.InternalObjects.Add(new GameObject("ID_1", "bed1", new Vector2(10, 10)));
-            World.InternalObjects.Add(new GameObject("ID_2", "bed1", new Vector2(20, 10)));
-            World.InternalObjects.Add(new GameObject("ID_3", "bed1", new Vector2(30, 10)));
-            World.InternalObjects.Add(new GameObject("ID_4", "bed1", new Vector2(40, 10)));
-            World.InternalObjects.Add(new GameObject("ID_5", "bed1", new Vector2(10, 20)));
-            World.InternalObjects.Add(new GameObject("ID_6", "bed1", new Vector2(20, 20)));
-            World.InternalObjects.Add(new GameObject("ID_7", "bed2", new Vector2(30, 20)));
-            World.InternalObjects.Add(new GameObject("ID_8", "bed3", new Vector2(40, 20)));
+            World.Objects.Add(new GameObject("ID_1", "bed1", new Vector2(10, 10)));
+            World.Objects.Add(new GameObject("ID_2", "bed1", new Vector2(20, 10)));
+            World.Objects.Add(new GameObject("ID_3", "bed1", new Vector2(30, 10)));
+            World.Objects.Add(new GameObject("ID_4", "bed1", new Vector2(40, 10)));
+            World.Objects.Add(new GameObject("ID_5", "bed1", new Vector2(10, 20)));
+            World.Objects.Add(new GameObject("ID_6", "bed1", new Vector2(20, 20)));
+            World.Objects.Add(new GameObject("ID_7", "bed2", new Vector2(30, 20)));
+            World.Objects.Add(new GameObject("ID_8", "bed3", new Vector2(40, 20)));
 
             // Enable the FPS counter
             FrameRateCounter.Enable();
@@ -233,7 +236,7 @@ namespace BaseBuilder
 
         protected override void Update(GameTime gameTime)
         {
-            if (GameStateManager.State == GameState.Game)
+            if (GameStateManager.State == GameState.GameWorld)
             {
             Controls.Update();
             Camera.Update(gameTime);
@@ -373,7 +376,7 @@ namespace BaseBuilder
 
         protected override void Draw(GameTime gameTime)
         {
-            if (GameStateManager.State == GameState.Game)
+            if (GameStateManager.State == GameState.GameWorld)
             {
             GraphicsDevice.Clear(backColour);
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, Camera.Transform);
@@ -471,7 +474,7 @@ namespace BaseBuilder
                 }
             }
 
-            foreach (GameObject io in World.InternalObjects)
+            foreach (GameObject io in World.Objects)
             {
                 Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.ObjectType.Sprite).Width, Sprites.Get(io.ObjectType.Sprite).Height);
                 spriteBatch.Draw(Sprites.Get(io.ObjectType.Sprite), re2, World.Clock.AmbientLightFromTime);

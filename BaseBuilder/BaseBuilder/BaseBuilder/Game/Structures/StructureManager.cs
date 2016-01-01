@@ -9,34 +9,33 @@ using Microsoft.Xna.Framework.Content;
 
 namespace BaseBuilder
 {
-    public static class ObjectManager
+    public static class StructureManager
     {
-        // This holds all types of objects
-        private static Dictionary<string, ObjectType> _objectTypes;
+        private static Dictionary<string, StructureType> _structureTypes;
 
-        static ObjectManager()
+        static StructureManager()
         {
-            _objectTypes = new Dictionary<string, ObjectType>();
+            _structureTypes = new Dictionary<string, StructureType>();
         }
 
         /// <summary>
-        /// Returns an object type based on its key
+        /// This will return an structure type based on its key
         /// </summary>
-        /// <param name="key">The key of the object type</param>
-        /// <returns>An object type</returns>
-        public static ObjectType GetType(string key)
+        /// <param name="key">The key of the structure type</param>
+        /// <returns>An structure type</returns>
+        public static StructureType GetType(string key)
         {
             if (string.IsNullOrEmpty(key) == false)
             {
-                if (_objectTypes.ContainsKey(key))
+                if (_structureTypes.ContainsKey(key))
                 {
-                    return _objectTypes[key];
+                    return _structureTypes[key];
                 }
             }
             return null;
         }
 
-        public static void LoadObjectBank(string file, ContentManager content)
+        public static void LoadStructureBank(string file, ContentManager content)
         {
             using (var stream = TitleContainer.OpenStream(file))
             {
@@ -52,23 +51,21 @@ namespace BaseBuilder
                             string name = split[1];
                             string description = split[2];
                             string sprite = split[3];
-                            bool isInternal = bool.Parse(split[4]);
-                            bool isInteractable = bool.Parse(split[5]);
-                            int width = int.Parse(split[6]);
-                            int height = int.Parse(split[7]);
+                            int width = int.Parse(split[4]);
+                            int height = int.Parse(split[5]);
 
-                            ObjectType newObject = new ObjectType(id, name, description, sprite, isInternal, isInteractable, width, height);
-                            _objectTypes.Add(id, newObject);
+                            StructureType newStructure = new StructureType(id, name, description, sprite, width, height);
+                            _structureTypes.Add(id, newStructure);
                         }
                     }
                 }
             }
         }
 
-        public static Dictionary<string, ObjectType> ObjectTypes
+        public static Dictionary<string, StructureType> StructureTypes
         {
-            get { return ObjectManager._objectTypes; }
-            set { ObjectManager._objectTypes = value; }
+            get { return _structureTypes; }
+            set { _structureTypes = value; }
         }
     }
 }

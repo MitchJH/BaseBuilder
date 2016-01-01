@@ -5,30 +5,20 @@ using System.Text;
 
 namespace BaseBuilder
 {
-    public class ObjectType
+    public class StructureType
     {
         private string _key;
         private string _name;
         private string _description;
         private string _sprite;
-        private bool _isInternal;
-        private bool _isInteractable;
         private int _width;
         private int _height;
 
-        public ObjectType()
+        public StructureType()
         {
         }
-        public ObjectType(string key, string name, string description, string sprite, bool isInternal, bool isInteractable,  int width, int height)
+        public StructureType(string key, string name, string description, string sprite, int width, int height)
         {
-            _key = key;
-            _name = name;
-            _description = description;
-            _sprite = sprite;
-            _isInternal = isInternal;
-            _isInteractable = isInteractable;
-            _width = width;
-            _height = height;
         }
 
         public string Key
@@ -53,18 +43,6 @@ namespace BaseBuilder
         {
             get { return _sprite; }
             set { _sprite = value; }
-        }
-
-        public bool Internal
-        {
-            get { return _isInternal; }
-            set { _isInternal = value; }
-        }
-
-        public bool Interactable
-        {
-            get { return _isInteractable; }
-            set { _isInteractable = value; }
         }
 
         public int Width

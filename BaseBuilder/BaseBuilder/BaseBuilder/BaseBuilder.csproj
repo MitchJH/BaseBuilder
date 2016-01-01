@@ -110,6 +110,9 @@
     <Compile Include="Framework\Camera.cs" />
     <Compile Include="Framework\Localization.cs" />
     <Compile Include="Game\Planet.cs" />
+    <Compile Include="Game\Structures\GameStructure.cs" />
+    <Compile Include="Game\Structures\StructureManager.cs" />
+    <Compile Include="Game\Structures\StructureType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Engine.cs" />

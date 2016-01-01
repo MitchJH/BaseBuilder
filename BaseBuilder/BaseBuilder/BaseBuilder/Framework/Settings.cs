@@ -143,7 +143,7 @@ namespace BaseBuilder
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("# GENERAL SETTINGS");
             sb.AppendLine("window_mode " + _windowMode.ToString());
-            sb.AppendLine("starting_game_state " + _startingGameState.ToString() + " // MainMenu, Game, Exit");
+            sb.AppendLine("starting_game_state " + _startingGameState.ToString() + " // MainMenu, GameWorld, Exit");
             sb.AppendLine("x_res " + _X_resolution.ToString());
             sb.AppendLine("y_res " + _Y_resolution.ToString());
             sb.AppendLine("window_width " + _window_width.ToString());

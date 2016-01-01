@@ -1,0 +1,2 @@
+# ID, Name, Description, Sprite, Width, Height
+testBuilding,Test Building,Description Test,testBuilding,10,8

@@ -74,7 +74,7 @@ namespace BaseBuilder
         private void NewGame_Click(GUIControl sender)
         {
             Audio.PlaySoundEffect("high_double_beep");
-            GameStateManager.State = GameState.Game;
+            GameStateManager.State = GameState.GameWorld;
         }
 
         private void Settings_Click(GUIControl sender)
