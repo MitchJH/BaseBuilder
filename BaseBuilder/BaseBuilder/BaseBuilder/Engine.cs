@@ -223,10 +223,6 @@ namespace BaseBuilder
             World.Clock.SetClock(0, 0, 15, 55, 0);
             // Speed clock up a bit
             World.Clock.SetSpeed(ClockSpeed.MinutesPerSecond);
-
-            // Test music
-            MediaPlayer.IsRepeating = true;
-            Audio.PlayMusicTrack("background");
         }
 
         protected override void UnloadContent()
@@ -341,7 +337,7 @@ namespace BaseBuilder
                 // Check for exit.
                 if (Controls.Keyboard.IsKeyDown(Keys.Escape))
                 {
-                    GameStateManager.State = GameState.Exit;
+                    GameStateManager.State = GameState.MainMenu;
                 }
             }
             else if (GameStateManager.State == GameState.MainMenu)

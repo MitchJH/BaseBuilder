@@ -109,6 +109,18 @@ namespace BaseBuilder
             return MathHelper.Clamp(otherVolume * Settings.MasterVolume, 0.0f, 1.0f);
         }
 
+        public static bool Repeat
+        {
+            get
+            {
+                return MediaPlayer.IsRepeating;
+            }
+            set
+            {
+                MediaPlayer.IsRepeating = value;
+            }
+        }
+
         public static SoundEffect MISSING_AUDIO
         {
             get { return _MISSING_AUDIO; }

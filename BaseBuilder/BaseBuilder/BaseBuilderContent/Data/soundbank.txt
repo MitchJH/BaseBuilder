@@ -5,3 +5,4 @@ low_double_beep,Audio/low_double_beep,effect
 click,Audio/click,effect
 # MUSIC TRACKS
 background,Audio/Music/background,music
+main_menu,Audio/Music/main_menu,music

@@ -14,10 +14,12 @@ namespace BaseBuilder
         private Texture2D _background;
         private Texture2D _background_f;
         private Rectangle _backgroundSize;
-        Random rand = new Random();
+        private Random rand = new Random();
+        private bool showMenu = false;
 
         private Form _menuForm;
         private Rectangle menuRectangle;
+        private Label _quote;
 
         public MainMenu(Rectangle screen, ContentManager content)
         {
@@ -25,10 +27,9 @@ namespace BaseBuilder
             _background_f = content.Load<Texture2D>("Textures/UI/mars_bg_f");
             _backgroundSize = screen;
 
-            Point menuSize = new Point(320, 304);
-            Point menuPos = new Point((screen.Width / 2) - (menuSize.X / 2), (screen.Height / 2) - (menuSize.Y / 2));
             Texture2D menuTexture = content.Load<Texture2D>("Textures/UI/menu");
-            menuRectangle = new Rectangle(menuPos.X, menuPos.Y - 25, menuSize.X, menuSize.Y);
+            Point menuPos = new Point((screen.Width / 2) - (menuTexture.Width / 2), (screen.Height / 2) - (menuTexture.Height / 2));
+            menuRectangle = new Rectangle(menuPos.X, menuPos.Y - 30, menuTexture.Width, menuTexture.Height);
             _menuForm = new Form("menuForm", "", menuRectangle, menuTexture, Fonts.Standard, Color.White);
 
             Texture2D buttonTexture = content.Load<Texture2D>("Textures/UI/button");
@@ -45,9 +46,18 @@ namespace BaseBuilder
             _newGame.onMouseEnter += new EHandler(Beep);
             _menuForm.AddControl(_newGame);
 
+            // LOAD GAME BUTTON
+            Button _loadGame = new Button("load_game", "Load Game",
+                new Rectangle(40, 150, buttonSize.X, buttonSize.Y),
+                buttonTexture, buttonFont, Color.Black);
+
+            _loadGame.onClick += new EHandler(LoadGame_Click);
+            _loadGame.onMouseEnter += new EHandler(Beep);
+            _menuForm.AddControl(_loadGame);
+
             // SETTINGS BUTTON
             Button _settings = new Button("settings", "Settings",
-                new Rectangle(40, 150, buttonSize.X, buttonSize.Y),
+                new Rectangle(40, 210, buttonSize.X, buttonSize.Y),
                 buttonTexture, buttonFont, Color.Black);
 
             _settings.onClick += new EHandler(Settings_Click);
@@ -56,7 +66,7 @@ namespace BaseBuilder
 
             // EXIT BUTTON
             Button _exit = new Button("exit", "Exit",
-                new Rectangle(40, 210, buttonSize.X, buttonSize.Y),
+                new Rectangle(40, 270, buttonSize.X, buttonSize.Y),
                 buttonTexture, buttonFont, Color.Black);
 
             _exit.onClick += new EHandler(Exit_Click);
@@ -65,21 +75,40 @@ namespace BaseBuilder
 
             // VERSION LABEL
             Vector2 stringSizeVersion = Fonts.Get("Tiny").MeasureString(Version.GetVersion());
-            Vector2 labelPosVersion = new Vector2(160 - (stringSizeVersion.X / 2), 280);
+            Vector2 labelPosVersion = new Vector2(160 - (stringSizeVersion.X / 2), menuTexture.Height - 20);
             Label _labelVersion = new Label("version", Version.GetVersion(), labelPosVersion, Fonts.Get("Tiny"), Color.White, Version.GetVersion().Length, 0);
             _menuForm.AddControl(_labelVersion);
+
+            // Quote
+            string quote = "Copyright © DAM Games " + DateTime.Now.Year;
+            string font = "Quote";
+            float stringSize = Fonts.Get(font).MeasureString(quote).X;
+            _quote = new Label("quote", quote, new Vector2((screen.Width / 2) - (stringSize / 2), screen.Height - 20), Fonts.Get(font), Color.White * 0.5f, quote.Length, 0);
+            
+            // Test music
+            Audio.Repeat = true;
+            Audio.PlayMusicTrack("main_menu");
         }
 
         public void Update()
         {
-            _menuForm.Update(Controls.Mouse, Controls.Keyboard);
+            if (showMenu)
+            {
+                _menuForm.Update(Controls.Mouse, Controls.Keyboard);
+            }
 
             if (fadeIn < 1.0f)
             {
                 fadeIn = MathHelper.Lerp(fadeIn, 1.0f, 0.005f);
 
                 if (fadeIn > 0.95f)
+                {
                     fadeIn = 1.0f;
+                }
+                else if (fadeIn > 0.4f)
+                {
+                    showMenu = true;
+                }
             }
             else
             {
@@ -104,15 +133,9 @@ namespace BaseBuilder
                     point = "MID_FROM_LOW";
                 }
             }
-
-            // Check for exit.
-            if (Controls.Keyboard.IsKeyDown(Keys.Escape))
-            {
-                GameStateManager.State = GameState.Exit;
-            }
         }
 
-        float fadeIn = 0.0f;
+        float fadeIn = -0.01f;
         float light = 0.0f;
         string point = "HIGH";
 
@@ -133,8 +156,11 @@ namespace BaseBuilder
                 }
             }
 
-            _menuForm.Draw(spriteBatch);
-            spriteBatch.DrawRectangle(menuRectangle, Color.Black, 1);
+            if (showMenu)
+            {
+                _menuForm.Draw(spriteBatch);
+                _quote.Draw(spriteBatch);
+            }
             spriteBatch.End();
         }
 
@@ -142,6 +168,11 @@ namespace BaseBuilder
         {
             Audio.PlaySoundEffect("high_double_beep");
             GameStateManager.State = GameState.GameWorld;
+        }
+
+        private void LoadGame_Click(GUIControl sender)
+        {
+            Audio.PlaySoundEffect("low_double_beep");
         }
 
         private void Settings_Click(GUIControl sender)
