@@ -32,7 +32,13 @@ namespace BaseBuilder
             EmptyMap();
         }
 
-        
+        public static void Update(GameTime gameTime)
+        {
+        }
+
+        public static void Draw(SpriteBatch spriteBatch)
+        {
+        }
 
         public class RayCastingResult
         {

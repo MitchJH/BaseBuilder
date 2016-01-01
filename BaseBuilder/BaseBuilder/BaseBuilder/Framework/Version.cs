@@ -31,6 +31,11 @@ namespace BaseBuilder
         {
             _enabled = false;
         }
+        
+        public static string GetVersion()
+        {
+            return _version;
+        }
 
         public static void Draw(SpriteBatch spriteBatch)
         {

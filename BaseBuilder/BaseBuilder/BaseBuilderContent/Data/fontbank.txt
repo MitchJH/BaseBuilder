@@ -2,3 +2,4 @@
 Standard,Fonts/Standard
 ButtonText,Fonts/ButtonText
 Tiny,Fonts/Tiny
+Menu,Fonts/MainMenu
