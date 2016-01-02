@@ -79,7 +79,7 @@ namespace BaseBuilder
         }
 
         public CrewMember(string name, int age, float posX, float posY, string sprite)
-            : base(new Vector2(posX, posY), 64, 64, 64, true, name)
+            : base(new Vector2(posX, posY), 64, 64, 32, true, name)
         {
             _name = name;
             _age = age;
@@ -257,15 +257,22 @@ namespace BaseBuilder
                                 _path_waypoints.RemoveAt(i + 1);
                                 i = i - 1;
                                 waypoints_removed++;
+                                Console.WriteLine("removed straight");
                             }
                             
                         }
                         //TODO: Diagonal direction.
-                        else if (_path_waypoints[i].X + Constants.TILE_SIZE == _path_waypoints[i + 1].X && _path_waypoints[i].Y + Constants.TILE_SIZE == _path_waypoints[i + 1].Y)
+                        /*if (_path_waypoints[i].X + Constants.TILE_SIZE == _path_waypoints[i + 1].X && _path_waypoints[i].Y + Constants.TILE_SIZE == _path_waypoints[i + 1].Y)
                         {
-                           // _path_waypoints.RemoveAt(i);
-                            //i = i - 1;
-                        }
+                            if (_path_waypoints[i].X + Constants.TILE_SIZE * 2 == _path_waypoints[i + 2].X && _path_waypoints[i].Y + Constants.TILE_SIZE * 2 == _path_waypoints[i + 2].Y)
+                            {
+                                _path_waypoints.RemoveAt(i + 1);
+                                i = i - 1;
+                                waypoints_removed++;
+                                Console.WriteLine("removed diagonal");
+                            }
+                            
+                        }*/
                     }
                 }
 

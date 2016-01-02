@@ -8,21 +8,21 @@ using Microsoft.Xna.Framework.Input;
 
 namespace BaseBuilder
 {
-    public class EntityCollider
+    public static class EntityCollider
     {
-        List<Entity> all_game_entities;
+        private static List<Entity> all_game_entities;
 
-        public EntityCollider()
+        static EntityCollider()
         {
             all_game_entities = new List<Entity>();
         }
 
-        public void Add(Entity entity)
+        public static void Add(Entity entity)
         {
             all_game_entities.Add(entity);
         }
-       
-        public void Collide(GameTime gameTime)
+
+        public static void Collide(GameTime gameTime)
         {
             Entity collidee;
             Entity collider;
@@ -54,7 +54,7 @@ namespace BaseBuilder
             }
         }
 
-        public void Update(GameTime gameTime)
+        public static void Update(GameTime gameTime)
         {
             Collide(gameTime);
         }

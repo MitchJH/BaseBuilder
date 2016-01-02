@@ -16,7 +16,6 @@ namespace BaseBuilder
         GraphicsDeviceManager graphics;
         Color backColour = Color.FromNonPremultiplied(100, 100, 100, 255);
         SpriteBatch spriteBatch;
-        EntityCollider _entity_collider;
 
         // Menus
         MainMenu mainMenu;
@@ -116,19 +115,16 @@ namespace BaseBuilder
             //This should be loaded in from Save File. Hardcoded for now.
             World.CrewMembers.Add(new CrewMember("James", 23, 90, 60, "crew"));
             World.CrewMembers.Add(new CrewMember("John", 25, 250, 160, "crew"));
-            World.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
-            World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
-            World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
-            
-            //Initialize the EntityCollider
-            _entity_collider = new EntityCollider();
+            //World.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
+            //World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
+            //World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
 
             //Add all objects that can collide to the entity collider. Do this somewhere else later, and in real time as objects get added/removed from the world.
             foreach (Entity e in World.CrewMembers)
             {
                 if (e.Dynamic)
                 {
-                    _entity_collider.Add(e);
+                    EntityCollider.Add(e);
                 }
             }
 
@@ -235,7 +231,7 @@ namespace BaseBuilder
                 World.Clock.Update(gameTime);
                 clock.Text = World.Clock.Time;
 
-                _entity_collider.Update(gameTime);
+                EntityCollider.Collide(gameTime);
 
                 if (Controls.Mouse.IsInCameraView()) // Don't do anything with the mouse if it's not in our cameras viewport.
                 {
