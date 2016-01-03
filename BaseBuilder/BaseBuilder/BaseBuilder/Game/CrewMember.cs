@@ -239,9 +239,12 @@ namespace BaseBuilder
 
                 //Debug
                 Console.WriteLine("There are " + _path_waypoints.Count + " current waypoints calculated on the path.");
-                int waypoints_removed = 0;
+                sbyte waypoints_removed = 0;
 
                 //Node culling.
+                List<Vector2> points_to_remove = new List<Vector2>();
+
+                Console.WriteLine("Beginning directional cull.");
                 for (int i = 0; i < _path_waypoints.Count; i++)
                 {
                     //If there is at least 2 waypoints.
@@ -253,27 +256,64 @@ namespace BaseBuilder
                             //If the current waypoint is equal to the next next waypoints X or Y axis. (Straight above or below, or to the right or left). This prevents removing the last node before a turn in direction.
                             if (_path_waypoints[i].X == _path_waypoints[i + 2].X || _path_waypoints[i].Y == _path_waypoints[i + 2].Y)
                             {
-                                //Remove the next waypoint.
-                                _path_waypoints.RemoveAt(i + 1);
-                                i = i - 1;
-                                waypoints_removed++;
-                                Console.WriteLine("removed straight");
+                                points_to_remove.Add(_path_waypoints[i + 1]);
                             }
-                            
                         }
-                        //TODO: Diagonal direction.
-                        /*if (_path_waypoints[i].X + Constants.TILE_SIZE == _path_waypoints[i + 1].X && _path_waypoints[i].Y + Constants.TILE_SIZE == _path_waypoints[i + 1].Y)
-                        {
-                            if (_path_waypoints[i].X + Constants.TILE_SIZE * 2 == _path_waypoints[i + 2].X && _path_waypoints[i].Y + Constants.TILE_SIZE * 2 == _path_waypoints[i + 2].Y)
-                            {
-                                _path_waypoints.RemoveAt(i + 1);
-                                i = i - 1;
-                                waypoints_removed++;
-                                Console.WriteLine("removed diagonal");
-                            }
-                            
-                        }*/
                     }
+                }
+
+
+                //Debug
+                Console.WriteLine("Beginning diagonal culls.");
+
+                bool diagonal_culling = true;
+                sbyte culling_count = 0;
+
+                sbyte directionX = 1;
+                sbyte directionY = 1;
+
+                while (diagonal_culling)
+                {
+                    for (int i = 0; i < _path_waypoints.Count - 2; i++)
+                    {
+                        if (_path_waypoints[i].X + (Constants.TILE_SIZE * directionX) == _path_waypoints[i + 1].X && _path_waypoints[i].Y + (Constants.TILE_SIZE * directionY) == _path_waypoints[i + 1].Y)
+                        {
+                            if (_path_waypoints[i + 1].X + (Constants.TILE_SIZE * directionX) == _path_waypoints[i + 2].X && _path_waypoints[i + 1].Y + (Constants.TILE_SIZE * directionY) == _path_waypoints[i + 2].Y)
+                            {
+                                points_to_remove.Add(_path_waypoints[i + 1]);
+                            }
+                        }
+                    }
+
+                    culling_count++;
+                    //Change the direction each time from NE, NW, SE, SW.
+                    if(culling_count == 1)
+                    {
+                        directionX = -1;
+                        directionY = -1;
+                    }
+                    else if(culling_count == 2)
+                    {
+                        directionX = 1;
+                        directionY = -1;
+                    }
+                    else if (culling_count == 3)
+                    {
+                        directionX = -1;
+                        directionY = 1;
+                    }
+                    if(culling_count == 4)
+                    {
+                        diagonal_culling = false;
+                    }
+                }
+
+                //Remove saved waypoints.
+                while (points_to_remove.Count > 0)
+                {
+                    _path_waypoints.Remove(points_to_remove[0]);
+                    points_to_remove.RemoveAt(0);
+                    waypoints_removed++;
                 }
 
                 //Debug
