@@ -85,7 +85,6 @@
     <Compile Include="Framework\GUI\CheckBox.cs" />
     <Compile Include="Framework\GUI\CircleButton.cs" />
     <Compile Include="Framework\GUI\GUIControl.cs" />
-    <Compile Include="Framework\GUI\DomainLeftRight.cs" />
     <Compile Include="Framework\GUI\Form.cs" />
     <Compile Include="Framework\GUI\KeyboardUtils.cs" />
     <Compile Include="Framework\GUI\Label.cs" />

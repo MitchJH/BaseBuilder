@@ -42,22 +42,19 @@ namespace BaseBuilder
 
         public static void LoadSpriteBank(string file, ContentManager content)
         {
-            using (var stream = TitleContainer.OpenStream(file))
+            using (var reader = new StreamReader(TitleContainer.OpenStream(file)))
             {
-                using (var reader = new StreamReader(stream))
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
                     {
-                        if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
-                        {
-                            string[] split = line.Split(',');
-                            string id = split[0];
-                            string filepath = split[1];
+                        string[] split = line.Split(',');
+                        string id = split[0];
+                        string filepath = split[1];
 
-                            Texture2D newTexture = content.Load<Texture2D>(filepath);
-                            _sprites.Add(id, newTexture);
-                        }
+                        Texture2D newTexture = content.Load<Texture2D>(filepath);
+                        _sprites.Add(id, newTexture);
                     }
                 }
             }

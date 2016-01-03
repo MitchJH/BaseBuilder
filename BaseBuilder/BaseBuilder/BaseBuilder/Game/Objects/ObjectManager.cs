@@ -38,28 +38,25 @@ namespace BaseBuilder
 
         public static void LoadObjectBank(string file, ContentManager content)
         {
-            using (var stream = TitleContainer.OpenStream(file))
+            using (var reader = new StreamReader(TitleContainer.OpenStream(file)))
             {
-                using (var reader = new StreamReader(stream))
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
                     {
-                        if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
-                        {
-                            string[] split = line.Split(',');
-                            string id = split[0];
-                            string name = split[1];
-                            string description = split[2];
-                            string sprite = split[3];
-                            bool isInternal = bool.Parse(split[4]);
-                            bool isInteractable = bool.Parse(split[5]);
-                            int width = int.Parse(split[6]);
-                            int height = int.Parse(split[7]);
+                        string[] split = line.Split(',');
+                        string id = split[0];
+                        string name = split[1];
+                        string description = split[2];
+                        string sprite = split[3];
+                        bool isInternal = bool.Parse(split[4]);
+                        bool isInteractable = bool.Parse(split[5]);
+                        int width = int.Parse(split[6]);
+                        int height = int.Parse(split[7]);
 
-                            ObjectType newObject = new ObjectType(id, name, description, sprite, isInternal, isInteractable, width, height);
-                            _objectTypes.Add(id, newObject);
-                        }
+                        ObjectType newObject = new ObjectType(id, name, description, sprite, isInternal, isInteractable, width, height);
+                        _objectTypes.Add(id, newObject);
                     }
                 }
             }

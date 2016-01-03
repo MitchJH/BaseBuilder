@@ -37,26 +37,23 @@ namespace BaseBuilder
 
         public static void LoadStructureBank(string file, ContentManager content)
         {
-            using (var stream = TitleContainer.OpenStream(file))
+            using (var reader = new StreamReader(TitleContainer.OpenStream(file)))
             {
-                using (var reader = new StreamReader(stream))
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
                     {
-                        if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
-                        {
-                            string[] split = line.Split(',');
-                            string id = split[0];
-                            string name = split[1];
-                            string description = split[2];
-                            string sprite = split[3];
-                            int width = int.Parse(split[4]);
-                            int height = int.Parse(split[5]);
+                        string[] split = line.Split(',');
+                        string id = split[0];
+                        string name = split[1];
+                        string description = split[2];
+                        string sprite = split[3];
+                        int width = int.Parse(split[4]);
+                        int height = int.Parse(split[5]);
 
-                            StructureType newStructure = new StructureType(id, name, description, sprite, width, height);
-                            _structureTypes.Add(id, newStructure);
-                        }
+                        StructureType newStructure = new StructureType(id, name, description, sprite, width, height);
+                        _structureTypes.Add(id, newStructure);
                     }
                 }
             }

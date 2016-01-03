@@ -21,7 +21,7 @@ namespace BaseBuilder
             _frameRate = 0;
             _frameCounter = 0;
             _elapsedTime = TimeSpan.Zero;
-            _font = Fonts.Get("Standard");
+            _font = Fonts.Standard;
         }
 
         public static void Enable()

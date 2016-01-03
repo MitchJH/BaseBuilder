@@ -20,22 +20,19 @@ namespace BaseBuilder
 
         public static void LoadFontBank(string file, ContentManager content)
         {
-            using (var stream = TitleContainer.OpenStream(file))
+            using (var reader = new StreamReader(TitleContainer.OpenStream(file)))
             {
-                using (var reader = new StreamReader(stream))
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    if (line.StartsWith("#") == false)
                     {
-                        if (line.StartsWith("#") == false)
-                        {
-                            string[] split = line.Split(',');
-                            string id = split[0];
-                            string filepath = split[1];
+                        string[] split = line.Split(',');
+                        string id = split[0];
+                        string filepath = split[1];
 
-                            SpriteFont newFont = content.Load<SpriteFont>(filepath);
-                            _fonts.Add(id, newFont);
-                        }
+                        SpriteFont newFont = content.Load<SpriteFont>(filepath);
+                        _fonts.Add(id, newFont);
                     }
                 }
             }

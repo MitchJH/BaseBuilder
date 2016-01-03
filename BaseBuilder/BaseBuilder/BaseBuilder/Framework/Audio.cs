@@ -26,30 +26,27 @@ namespace BaseBuilder
 
         public static void LoadSoundBank(string file, ContentManager content)
         {
-            using (var stream = TitleContainer.OpenStream(file))
+            using (var reader = new StreamReader(TitleContainer.OpenStream(file)))
             {
-                using (var reader = new StreamReader(stream))
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
                     {
-                        if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
-                        {
-                            string[] split = line.Split(',');
-                            string id = split[0];
-                            string filepath = split[1];
-                            string audioType = split[2];
+                        string[] split = line.Split(',');
+                        string id = split[0];
+                        string filepath = split[1];
+                        string audioType = split[2];
 
-                            if (audioType == "effect")
-                            {
-                                SoundEffect newSound = content.Load<SoundEffect>(filepath);
-                                _sounds.Add(id, newSound);
-                            }
-                            else if (audioType == "music")
-                            {
-                                Song newSong = content.Load<Song>(filepath);
-                                _music.Add(id, newSong);
-                            }
+                        if (audioType == "effect")
+                        {
+                            SoundEffect newSound = content.Load<SoundEffect>(filepath);
+                            _sounds.Add(id, newSound);
+                        }
+                        else if (audioType == "music")
+                        {
+                            Song newSong = content.Load<Song>(filepath);
+                            _music.Add(id, newSong);
                         }
                     }
                 }

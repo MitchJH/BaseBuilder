@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace BaseBuilder
 {
@@ -30,28 +32,23 @@ namespace BaseBuilder
         }
 
         /// <summary>
-        /// Load the localization file of the currently selected language
+        /// Load the localization file of the selected language
         /// </summary>
-        public static void LoadLocalization()
+        public static void LoadLocalization(Languages lang)
         {
-            if (File.Exists("Localization.csv"))
+            using (var reader = new StreamReader(TitleContainer.OpenStream("Data/Localization/" + lang.ToString())))
             {
-                string[] lines = File.ReadAllLines("Localization.csv");
-
-                foreach (string line in lines)
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    if (string.IsNullOrEmpty(line) == false)
+                    if (line.StartsWith("#") == false && string.IsNullOrEmpty(line) == false)
                     {
                         string[] split = line.Split(',');
                         string key = split[0];
-                        string textValue = split[1];
-                        _textValues.Add(key, textValue);
+                        string text = split[1];
+                        _textValues.Add(key, text);
                     }
                 }
-            }
-            else
-            {
-                // TODO: Add an error message for the localization file not being found
             }
         }
 
@@ -87,7 +84,7 @@ namespace BaseBuilder
                 {
                     // Only load the loc if it's a different language being requested compared to the current
                     _language = value;
-                    LoadLocalization();
+                    LoadLocalization(_language);
                 }
             }
         }
