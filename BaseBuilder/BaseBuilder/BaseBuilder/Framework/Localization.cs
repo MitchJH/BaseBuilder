@@ -34,9 +34,9 @@ namespace BaseBuilder
         /// <summary>
         /// Load the localization file of the selected language
         /// </summary>
-        public static void LoadLocalization(Languages lang)
+        public static void LoadLocalization()
         {
-            using (var reader = new StreamReader(TitleContainer.OpenStream("Data/Localization/" + lang.ToString())))
+            using (var reader = new StreamReader(TitleContainer.OpenStream("Content/Data/Localization/" + _language.ToString() + ".txt")))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -84,7 +84,7 @@ namespace BaseBuilder
                 {
                     // Only load the loc if it's a different language being requested compared to the current
                     _language = value;
-                    LoadLocalization(_language);
+                    LoadLocalization();
                 }
             }
         }
