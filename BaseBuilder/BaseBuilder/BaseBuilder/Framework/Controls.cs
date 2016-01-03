@@ -16,6 +16,9 @@ namespace BaseBuilder
         private static MouseState _oldMouseState;
         private static KeyboardState _oldKeyboardState;
 
+        private static Vector2 _gameMousePosition;
+        private static Point _mouseTilePosition;
+
         static Controls()
         {
         }
@@ -27,6 +30,12 @@ namespace BaseBuilder
 
             _currentMouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
             _currentKeyboardState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+
+
+            Vector2 mousePosition = new Vector2(_currentMouseState.X, _currentMouseState.Y);
+            _gameMousePosition = Vector2.Transform(mousePosition, Camera.InverseTransform);
+
+            _mouseTilePosition = new Point((int)(_gameMousePosition.X / Constants.TILE_SIZE), (int)(_gameMousePosition.Y / Constants.TILE_SIZE));
         }
 
         public static MouseState Mouse
@@ -58,6 +67,22 @@ namespace BaseBuilder
             get
             {
                 return _oldKeyboardState;
+            }
+        }
+
+        public static Vector2 GameMousePosition
+        {
+            get
+            {
+                return Controls._gameMousePosition;
+            }
+        }
+
+        public static Point MouseTilePosition
+        {
+            get
+            {
+                return Controls._mouseTilePosition;
             }
         }
     }
