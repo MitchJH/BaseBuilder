@@ -113,9 +113,9 @@ namespace BaseBuilder
             //This should be loaded in from Save File. Hardcoded for now.
             World.CrewMembers.Add(new CrewMember("James", 23, 90, 60, "crew"));
             World.CrewMembers.Add(new CrewMember("John", 25, 250, 160, "crew"));
-            //World.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
-            //World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
-            //World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
+            World.CrewMembers.Add(new CrewMember("Joe", 33, 650, 300, "crew"));
+            World.CrewMembers.Add(new CrewMember("Jim", 27, 480, 100, "crew"));
+            World.CrewMembers.Add(new CrewMember("Jack", 21, 790, 333, "crew"));
 
             //Add all objects that can collide to the entity collider. Do this somewhere else later, and in real time as objects get added/removed from the world.
             foreach (Entity e in World.CrewMembers)
@@ -268,7 +268,9 @@ namespace BaseBuilder
 
                     //DEBUG: Display their needs.
 
-
+                    /* This is probably just debug for now, but it's the code for drawing in the Red and Green Square for pathfinding.
+                     * 
+                     */
                     //If a crew has a path then display it when they are selected.
                     if (crew_member.Path.Count > 0)
                     {
@@ -290,9 +292,7 @@ namespace BaseBuilder
                         }
                     }
 
-                    /* This is probably just debug for now, but it's the code for drawing in the Red and Green Square for pathfinding.
-                     * 
-                     */
+                    
                     if (crew_member.StartTile != Point.Zero)
                     {
                         Rectangle tileRectangle = new Rectangle(
@@ -311,7 +311,7 @@ namespace BaseBuilder
                     }
 
                     crew_member.Draw(spriteBatch);
-
+                    
                 }
             }
 

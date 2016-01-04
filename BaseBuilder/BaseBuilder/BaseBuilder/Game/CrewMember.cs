@@ -44,6 +44,7 @@ namespace BaseBuilder
         
         private string _activity;       //A description of what the crew member is doing.
 
+        private sbyte _path_waypoint_radius; //The distance between the crew and destination before they consider arriving.
         public CrewMember()
             : base()
         {
@@ -99,8 +100,11 @@ namespace BaseBuilder
             _skills.Agriculture = 0;
             _skills.Medicine = 0;
 
-            _walk_speed = 500;
-            _run_speed = 1000;
+            _walk_speed = 4;
+            _run_speed = 10;
+            _path_waypoint_radius = 30;
+
+            MaxVelocity = _walk_speed;
 
             _traits = new List<Trait>();
 
@@ -165,9 +169,9 @@ namespace BaseBuilder
 
                 Vector2 force = new Vector2(0, 0);
 
-                force += Direction * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                force += Direction * 600 * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                ApplyForce(force * _walk_speed);
+                ApplyForce(force);
                 
                 if (_current_state != (byte)State.Walking)
                 {
@@ -175,8 +179,8 @@ namespace BaseBuilder
                 }
 
                 //Once a waypoint has been reached, remove it from the list.
-                //The RemoveAt function removes the index specified, and bumps all other idexes up.
-                if (Vector2.Distance(this.Position, _path_waypoints[0]) < 1)
+                //The RemoveAt function removes the index specified, and bumps all other indexes up.
+                if (Vector2.Distance(this.Position, _path_waypoints[0]) < _path_waypoint_radius)
                 {
                     _path_waypoints[0] = this.Position;
                     _path_waypoints.RemoveAt(0);
@@ -232,28 +236,22 @@ namespace BaseBuilder
                     Destination = new Vector2(_path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, _path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
 
                     _path_waypoints.Add(new Vector2(Destination.X + (Constants.TILE_SIZE / 2), Destination.Y + (Constants.TILE_SIZE / 2)));
-
-                    //Debug
-                    //Console.WriteLine("added ("+ Destination.X + "," + Destination.Y + ") to the route.");
                 }
 
                 //Debug
                 Console.WriteLine("There are " + _path_waypoints.Count + " current waypoints calculated on the path.");
-                sbyte waypoints_removed = 0;
 
                 //Node culling.
+                //Store a list of points to remove.
                 List<Vector2> points_to_remove = new List<Vector2>();
 
-                Console.WriteLine("Beginning directional cull.");
+                //If the current waypoint is equal to the next waypoints X or Y axis. (Straight above or below, or to the right or left)
                 for (int i = 0; i < _path_waypoints.Count; i++)
                 {
-                    //If there is at least 2 waypoints.
                     if (_path_waypoints.Count > i + 2)
                     {
-                        //If the current waypoint is equal to the next waypoints X or Y axis. (Straight above or below, or to the right or left)
                         if (_path_waypoints[i].X == _path_waypoints[i + 1].X || _path_waypoints[i].Y == _path_waypoints[i + 1].Y)
                         {
-                            //If the current waypoint is equal to the next next waypoints X or Y axis. (Straight above or below, or to the right or left). This prevents removing the last node before a turn in direction.
                             if (_path_waypoints[i].X == _path_waypoints[i + 2].X || _path_waypoints[i].Y == _path_waypoints[i + 2].Y)
                             {
                                 points_to_remove.Add(_path_waypoints[i + 1]);
@@ -261,10 +259,6 @@ namespace BaseBuilder
                         }
                     }
                 }
-
-
-                //Debug
-                Console.WriteLine("Beginning diagonal culls.");
 
                 bool diagonal_culling = true;
                 sbyte culling_count = 0;
@@ -274,6 +268,7 @@ namespace BaseBuilder
 
                 while (diagonal_culling)
                 {
+                    //Search for every waypoint that matches the waypoint which is diagonal to it, and has another one after it.
                     for (int i = 0; i < _path_waypoints.Count - 2; i++)
                     {
                         if (_path_waypoints[i].X + (Constants.TILE_SIZE * directionX) == _path_waypoints[i + 1].X && _path_waypoints[i].Y + (Constants.TILE_SIZE * directionY) == _path_waypoints[i + 1].Y)
@@ -286,6 +281,7 @@ namespace BaseBuilder
                     }
 
                     culling_count++;
+
                     //Change the direction each time from NE, NW, SE, SW.
                     if(culling_count == 1)
                     {
@@ -313,11 +309,7 @@ namespace BaseBuilder
                 {
                     _path_waypoints.Remove(points_to_remove[0]);
                     points_to_remove.RemoveAt(0);
-                    waypoints_removed++;
                 }
-
-                //Debug
-                Console.WriteLine("Removed " + waypoints_removed + ". There are now " + _path_waypoints.Count + " current waypoints calculated on the path.");
             }
 
             return true;

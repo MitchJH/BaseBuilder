@@ -24,12 +24,15 @@ namespace BaseBuilder
         private string _type;               //What type of entity is it.
 
         private Vector2 _velocity;          //The velocity, directly impacts position every frame.
+        private Vector2 _previous_velocity; //The velocity in the previous frame.
         private Vector2 _acceleration;      //The acceleration. The rate of change applied to velocity every frame. Can be decceleration too.
         private Vector2 _direction;         //The direction vector for the entity.
 
         private float _resistance;          //The modifier to the force applied in the opposite direction to which the entity is moving.
 
         private bool _in_motion;            //Whether or not the entity is moving.
+
+        private float _max_velocity;        //The maximum speed which the entity can move.
 
         public Entity()
         {
@@ -53,6 +56,8 @@ namespace BaseBuilder
             _resistance = 5;
 
             _in_motion = false;
+
+            _max_velocity = 10;
 
             Position = position;
             Width = width;
@@ -82,9 +87,21 @@ namespace BaseBuilder
             //If in motion, add acceleration to velocity and update position.
             if (_in_motion)
             {
-                _velocity += _acceleration * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                //If the velocity is below it's max velocity value.
+                if(_velocity.LengthSquared() < _max_velocity)
+                {
+                    _velocity += _acceleration * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
+                else //If the velocity is not below it's max velocity value then deccelerate it.
+                {
+                    _direction = Vector2.Normalize(_velocity);
 
-                Position += _velocity;
+                    _acceleration = new Vector2((_direction.X * _resistance), (_direction.Y * _resistance));
+
+                    _acceleration = _acceleration * -1;
+
+                    _velocity += _acceleration * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
 
                 //If the velocity has not reached 0, deccelerate in the direciton it's moving. Else, stop it.
                 if (_velocity != Vector2.Zero)
@@ -100,6 +117,9 @@ namespace BaseBuilder
                     _in_motion = false;
                 }
 
+                //Update the position.
+                Position += _velocity;
+
                 //Cleanup the small velocity and decceleration values.
                 if (System.Math.Abs(_velocity.X) < 0.1f)
                 {
@@ -113,13 +133,14 @@ namespace BaseBuilder
                 }
             }
 
-
+            _previous_velocity = _velocity;
         }
 
         public void ApplyForce(Vector2 force)
         {
             _acceleration += force;
             _in_motion = true;
+
         }
 
         /*Get the radius of the entity. If the height and width are different the radius isn't determined and just the (width / 2) is returned.
@@ -188,6 +209,12 @@ namespace BaseBuilder
         {
             get { return _velocity; }
             set { _velocity = value; }
+        }
+
+        public float MaxVelocity
+        {
+            get { return _max_velocity; }
+            set { _max_velocity = value; }
         }
 
         public Vector2 Direction
