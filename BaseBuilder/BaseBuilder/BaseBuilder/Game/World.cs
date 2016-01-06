@@ -195,7 +195,9 @@ namespace BaseBuilder
                                 Point start_location = new Point((int)cm.Position.X / Constants.TILE_SIZE, (int)cm.Position.Y / Constants.TILE_SIZE);
                                 Point destination = Controls.MouseTilePosition;
                                 Console.WriteLine("Generating Path from point (" + start_location.X + "," + start_location.Y + ") to point (" + destination.X + "," + destination.Y + ")");
-                                cm.DeterminePath(World.FindPath(start_location, destination));
+
+                                LinkedList<Tile> path = World.FindPath(start_location, destination);
+                                cm.DeterminePath(path);
                             }
                         }
                     }
@@ -251,37 +253,34 @@ namespace BaseBuilder
                 }
             }
 
-
+            foreach (GameObject io in World.Objects)
+            {
+                Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.ObjectType.Sprite).Width, Sprites.Get(io.ObjectType.Sprite).Height);
+                spriteBatch.Draw(Sprites.Get(io.ObjectType.Sprite), re2, World.Clock.AmbientLightFromTime);
+            }
 
             //Draw every crew members sprite.
             foreach (CrewMember crew_member in World.CrewMembers)
             {
                 //Drawing the texture at the position minus the width and height to center it. This will be done in the objects class in future.
-                Rectangle re = new Rectangle((int)crew_member.Position.X - (Sprites.Get(crew_member.Sprite).Width / 2), (int)crew_member.Position.Y - (Sprites.Get(crew_member.Sprite).Height / 2), 64, 64);
+                Rectangle re = new Rectangle((int)(crew_member.Position.X - (crew_member.Width / 2)), (int)(crew_member.Position.Y - (crew_member.Height / 2)), (int)crew_member.Width, (int)crew_member.Height);
                 spriteBatch.Draw(Sprites.Get(crew_member.Sprite), re, World.Clock.AmbientLightFromTime);
 
                 //If a crew member is selected then draw a circle around them.
                 if (crew_member.Selected)
                 {
                     spriteBatch.DrawCircle(crew_member.Position, 32, 20, Color.LightGreen, 2);
-
-
-                    //DEBUG: Display their needs.
-
-                    /* This is probably just debug for now, but it's the code for drawing in the Red and Green Square for pathfinding.
-                     * 
-                     */
-                    //If a crew has a path then display it when they are selected.
+                    
+                    // This is probably just debug for now, but it's the code for drawing in the Red and Green Square for pathfinding.
+                    // If a crew has a path then display it when they are selected.
                     if (crew_member.Path.Count > 0)
                     {
+                        Tile nextWP = crew_member.Path.First.Value;
+
+                        spriteBatch.DrawLine(crew_member.Position, nextWP.Center, Color.White, 1 / Camera.Zoom);
+
                         for (int i = 0; i < crew_member.Path.Count; i++)
                         {
-                            Rectangle tileRectangle = new Rectangle(
-                                crew_member.Path.ElementAt(i).Position.X * Constants.TILE_SIZE, crew_member.Path.ElementAt(i).Position.Y * Constants.TILE_SIZE,
-                                Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-                            //spriteBatch.FillRectangle(tileRectangle, Color.DarkBlue);
-
                             if (i + 1 < crew_member.Path.Count)
                             {
                                 Tile thisTile = new Tile(crew_member.Path.ElementAt(i).Position.X, crew_member.Path.ElementAt(i).Position.Y);
@@ -292,33 +291,21 @@ namespace BaseBuilder
                         }
                     }
 
-                    
-                    if (crew_member.StartTile != Point.Zero)
-                    {
-                        Rectangle tileRectangle = new Rectangle(
-                            crew_member.StartTile.X * Constants.TILE_SIZE, crew_member.StartTile.Y * Constants.TILE_SIZE,
-                            Constants.TILE_SIZE, Constants.TILE_SIZE);
+                    // Physics Debug Vectors
+                    Vector2 dirEnd = crew_member.Direction * 100;
+                    spriteBatch.DrawLine(crew_member.Position, crew_member.Position + dirEnd, Color.Red, 2);
+                    spriteBatch.DrawCircle(crew_member.Position + dirEnd, 5, 6, Color.Red);
 
-                        spriteBatch.FillRectangle(tileRectangle, Color.Green);
-                    }
-                    if (crew_member.EndTile != Point.Zero)
-                    {
-                        Rectangle tileRectangle = new Rectangle(
-                            crew_member.EndTile.X * Constants.TILE_SIZE, crew_member.EndTile.Y * Constants.TILE_SIZE,
-                            Constants.TILE_SIZE, Constants.TILE_SIZE);
+                    Vector2 accEnd = crew_member.Acceleration * 15;
+                    spriteBatch.DrawLine(crew_member.Position, crew_member.Position + accEnd, Color.Yellow, 2);
+                    spriteBatch.DrawCircle(crew_member.Position + accEnd, 5, 6, Color.Yellow);
 
-                        spriteBatch.FillRectangle(tileRectangle, Color.Red);
-                    }
+                    Vector2 velEnd = crew_member.Velocity * 20;
+                    spriteBatch.DrawLine(crew_member.Position, crew_member.Position + velEnd, Color.Green, 2);
+                    spriteBatch.DrawCircle(crew_member.Position + velEnd, 5, 6, Color.Green);
 
                     crew_member.Draw(spriteBatch);
-                    
                 }
-            }
-
-            foreach (GameObject io in World.Objects)
-            {
-                Rectangle re2 = new Rectangle((int)io.Position.X, (int)io.Position.Y, Sprites.Get(io.ObjectType.Sprite).Width, Sprites.Get(io.ObjectType.Sprite).Height);
-                spriteBatch.Draw(Sprites.Get(io.ObjectType.Sprite), re2, World.Clock.AmbientLightFromTime);
             }
 
             spriteBatch.End();
@@ -348,26 +335,6 @@ namespace BaseBuilder
             // #####################
         }
 
-        public class RayCastingResult
-        {
-            // Does the ray collide with the environment?
-            private bool doCollide;
-            // And if so, at which position?
-            private Vector2 position;
-
-            public bool DoCollide
-            {
-                get { return doCollide; }
-                set { doCollide = value; }
-            }
-
-            public Vector2 Position
-            {
-                get { return position; }
-                set { position = value; }
-            }
-        }
-
         /// <summary>
         /// Find a path through the world
         /// </summary>
@@ -389,104 +356,58 @@ namespace BaseBuilder
 
             // Generate a search map from our worlds tiles
             SpatialAStar<Tile, Object> aStar = new SpatialAStar<Tile, Object>(_tiles);
+
             // Begin the search and return the result
             LinkedList<Tile> tempPath = aStar.Search(start, end, extraContext);
-            return tempPath;
-            LinkedList<Tile> truePath = new LinkedList<Tile>();
 
-            
+            // Cull all tiles in the path that aren't needed
+            LinkedList<Tile> culledPath = CullPath(tempPath);
 
-            for (int i = 0; i < tempPath.Count; i++)
-            {
-                Vector2 startPos = new Vector2(start.X, start.Y);
-                Vector2 endPos = new Vector2(tempPath.ElementAt(i).Position.X, tempPath.ElementAt(i).Position.Y);
-                Vector2 dir = endPos - startPos;
-                float length = dir.Length();
-                dir.Normalize();
-
-                RayCastingResult rcr = RayCast(startPos, dir, length);
-
-                Ray r = new Ray(new Vector3(new Vector2(start.X, start.Y), 0.0f), new Vector3(dir, 0.0f));
-
-                if (rcr.DoCollide == true)
-                {
-                    truePath.AddLast(tempPath.ElementAt(i));
-                }
-            }
-            Console.WriteLine("Path generation successful");
-            return truePath;
+            return culledPath;
         }
 
-        public static RayCastingResult RayCast(Vector2 position, Vector2 direction, float rayLength)
+        private static LinkedList<Tile> CullPath(LinkedList<Tile> path)
         {
-            RayCastingResult result = new RayCastingResult();
-            result.DoCollide = false;
+            LinkedList<Tile> culledPath = new LinkedList<Tile>(path);
 
-            // Exit the function now if the ray length is 0
-            if (rayLength == 0)
+            // Iterate through each node in the path, we test each node to see if it can be removed
+            // We test this by casting a ray between the node before and after it, if this rays path
+            // is traversable then we know we don't need the node in question and we can remove it
+
+            // Example Node Iteration Visualization
+            // [0] [1] [2] [3] [4] [5] [6] [7] [8]
+            // [N] [Y] [Y] [Y] [Y] [Y] [Y] [Y] [N]
+
+            // Start at the second node to avoid trying to get rid of the first waypoint in our path
+            // End at the node before the last waypoint to avoid trying to get rid of our end destination
+            for (int i = 1; i < path.Count-1; i++)
             {
-                result.DoCollide = _tiles[(int)position.X, (int)position.Y].Type == TileType.Walkable;
-                result.Position = position;
+                // If we can walk between the node before and after the current node then we don't need the current node
+                bool shouldRemove = CanMoveBetweenTiles(path.ElementAt(i - 1), path.ElementAt(i + 1));
 
-                return result;
-            }
-
-            // Get the list of points from the Bresenham algorithm
-            direction.Normalize();
-            List<Vector2> rayLine = BresenhamLine(position, position + (direction * rayLength));
-
-            if (rayLine.Count > 0)
-            {
-                int rayPointIndex = 0;
-
-                if (rayLine[0] != position) rayPointIndex = rayLine.Count - 1;
-
-                // Loop through all the points starting from "position"
-                while (true)
+                if (shouldRemove == true)
                 {
-                    Vector2 rayPoint = rayLine[rayPointIndex];
-                    if (_tiles[(int)rayPoint.X, (int)rayPoint.Y].Type != TileType.Walkable)
-                    {
-                        result.Position = rayPoint;
-                        result.DoCollide = true;
-                        break;
-                    }
-                    if (rayLine[0] != position)
-                    {
-                        rayPointIndex--;
-                        if (rayPointIndex < 0) break;
-                    }
-                    else
-                    {
-                        rayPointIndex++;
-                        if (rayPointIndex >= rayLine.Count) break;
-                    }
+                    culledPath.Remove(path.ElementAt(i));
                 }
             }
 
-            return result;
+            return culledPath;
         }
 
-        // Swap the values of A and B
-        private static void Swap<T>(ref T a, ref T b)
+        private static bool CanMoveBetweenTiles(Tile start, Tile end)
         {
-            T c = a;
-            a = b;
-            b = c;
+            List<Vector2> hits = BresenhamLine(start.Center, end.Center);
+            return (hits.Count == 0);
         }
 
-        // Returns the list of points from p0 to p1 
-        private static List<Vector2> BresenhamLine(Vector2 p0, Vector2 p1)
+        // Returns the list of points between two Vector positions
+        private static List<Vector2> BresenhamLine(Vector2 start, Vector2 end)
         {
-            return BresenhamLine((int)p0.X, (int)p0.Y, (int)p1.X, (int)p1.Y);
-        }
+            int x0 = (int)start.X;
+            int y0 = (int)start.Y;
+            int x1 = (int)end.X;
+            int y1 = (int)end.Y;
 
-        // Returns the list of points from (x0, y0) to (x1, y1)
-        private static List<Vector2> BresenhamLine(int x0, int y0, int x1, int y1)
-        {
-            // Optimization: it would be preferable to calculate in
-            // advance the size of "result" and to use a fixed-size array
-            // instead of a list.
             List<Vector2> result = new List<Vector2>();
 
             bool steep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0);
@@ -509,7 +430,20 @@ namespace BaseBuilder
             if (y0 < y1) ystep = 1; else ystep = -1;
             for (int x = x0; x <= x1; x++)
             {
-                if (steep) result.Add(new Vector2(y, x)); else result.Add(new Vector2(x, y));
+                if (steep)
+                {
+                    if (TileFromCoordinate(y, x).Type == TileType.Impassable)
+                    {
+                        result.Add(new Vector2(y, x));
+                    }
+                }
+                else
+                {
+                    if (TileFromCoordinate(x, y).Type == TileType.Impassable)
+                    {
+                        result.Add(new Vector2(x, y));
+                    }
+                }
                 error += deltay;
                 if (2 * error >= deltax)
                 {
@@ -519,6 +453,17 @@ namespace BaseBuilder
             }
 
             return result;
+        }
+        private static void Swap<T>(ref T a, ref T b)
+        {
+            T c = a; a = b; b = c;
+        }
+
+        private static Tile TileFromCoordinate(float x, float y)
+        {
+            int x_t = (int)(x / Constants.TILE_SIZE);
+            int y_t = (int)(y / Constants.TILE_SIZE);
+            return _tiles[x_t, y_t];
         }
 
         private static void EmptyMap()

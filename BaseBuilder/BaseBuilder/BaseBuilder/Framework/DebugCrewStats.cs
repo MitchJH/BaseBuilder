@@ -37,17 +37,15 @@ namespace BaseBuilder
         {
             if (_enabled)
             {
-
                 string crew_name = crew_member.Name + ", " + crew_member.Activity;
                 string crew_health = "Health: " + crew_member.Needs.Health.ToString("0.00");
                 string crew_energy = "Energy: " + crew_member.Needs.Energy.ToString("0.00");
                 string crew_thirst = "Thirst: " + crew_member.Needs.Thirst.ToString("0.00");
                 string crew_stress = "Stress: " + crew_member.Needs.Stress.ToString("0.00");
                 string crew_hunger = "Hunger: " + crew_member.Needs.Hunger.ToString("0.00");
-
+                string path_info = "Path Nodes: " + crew_member.Path.Count.ToString();
 
                 spriteBatch.Begin();
-
 
                 spriteBatch.DrawString(_font, crew_name, new Vector2(2, 30), Color.Black);
                 spriteBatch.DrawString(_font, crew_name, new Vector2(1, 30), Color.Yellow);
@@ -66,6 +64,9 @@ namespace BaseBuilder
 
                 spriteBatch.DrawString(_font, crew_hunger, new Vector2(2, 130), Color.Black);
                 spriteBatch.DrawString(_font, crew_hunger, new Vector2(1, 130), Color.Yellow);
+
+                spriteBatch.DrawString(_font, path_info, new Vector2(2, 150), Color.Black);
+                spriteBatch.DrawString(_font, path_info, new Vector2(1, 150), Color.DarkGreen);
 
                 spriteBatch.End();
             }

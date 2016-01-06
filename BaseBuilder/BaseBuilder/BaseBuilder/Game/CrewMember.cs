@@ -22,29 +22,20 @@ namespace BaseBuilder
         private List<Trait> _traits;
 
         private string _sprite;
-        private Vector2 _destination;
 
-        private enum State : byte { Idle = 0, Walking = 1, Running = 2, Sleeping = 3, Building = 4};
+        private LinkedList<Tile> _path = new LinkedList<Tile>();
+        private const float WAYPOINT_RADIUS = 32.0f; //The distance between the crew and destination before they consider arriving.
 
+        private CrewState _current_state;       //The physical state which the crew member is currently in.
+        private float _current_exertion_rate;   //The current exertion rate the crew member has.
+        private float _current_damage_rate;     //The current rate at which damage is applied. This is WIP. Needs design check.
+        private float _current_hunger_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects hunger.
+        private float _current_thirst_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects thirst.
+        private float _current_stress_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects stress.
         
-
-        Point _startTile = Point.Zero;
-        Point _endTile = Point.Zero;
-
-        LinkedList<Tile> _path = new LinkedList<Tile>();
-        List<Vector2> _path_waypoints = new List<Vector2>();
+        private string _activity;   //A description of what the crew member is doing.
 
 
-        byte _current_state;            //The physical state which the crew member is currently in.
-        float _current_exertion_rate;   //The current exertion rate the crew member has.
-        float _current_damage_rate;     //The current rate at which damage is applied. This is WIP. Needs design check.
-        float _current_hunger_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects hunger.
-        float _current_thirst_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects thirst.
-        float _current_stress_rate;     //The current rate at which hunger is applied. This is WIP. Needs design check for what affects stress.
-        
-        private string _activity;       //A description of what the crew member is doing.
-
-        private sbyte _path_waypoint_radius; //The distance between the crew and destination before they consider arriving.
         public CrewMember()
             : base()
         {
@@ -72,11 +63,7 @@ namespace BaseBuilder
             _traits = new List<Trait>();
             Selected = false;
 
-            _startTile = Point.Zero;
-            _endTile = Point.Zero;
-
             _activity = "Idle";
-            this.Destination = this.Position;
         }
 
         public CrewMember(string name, int age, float posX, float posY, string sprite)
@@ -102,33 +89,26 @@ namespace BaseBuilder
 
             _walk_speed = 4;
             _run_speed = 10;
-            _path_waypoint_radius = 30;
 
-            MaxVelocity = _walk_speed;
+            this.MaxVelocity = _walk_speed;
 
             _traits = new List<Trait>();
 
             _sprite = sprite;
 
-            Position = new Vector2(posX, posY);
-
-            _startTile = new Point((int)posX, (int)posY);
-            _endTile = Point.Zero;
+            this.Position = new Vector2(posX, posY);
             
             _current_state = 0;
-            _current_exertion_rate = GetExertionRate(State.Idle);
+            _current_exertion_rate = GetExertionRate(CrewState.Idle);
             _current_damage_rate = -1;
             _current_hunger_rate = -0.2f;
             _current_thirst_rate = -0.25f;
             _current_stress_rate = -0.001f;
 
-            Width = 64;
-            Height = 64;
+            this.Width = 64;
+            this.Height = 64;
 
             _activity = "Idle";
-
-
-            this.Destination = this.Position;
         }
 
         public override void Collide(Entity entity)
@@ -137,183 +117,88 @@ namespace BaseBuilder
             _activity = "Collision detected.";
         }
 
-        public bool Update(GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
             Move(gameTime);
-
             UpdateNeeds(gameTime);
-
-            return true;
         }
 
-        public bool Draw(SpriteBatch sb)
+        public void Draw(SpriteBatch spritebatch)
         {
-            if (_path_waypoints.Count > 0)
+            if (_path.Count > 0)
             {
-                for (int i = 0; i < _path_waypoints.Count; i++)
-                    sb.DrawCircle(_path_waypoints[i], 4, 10, Color.Yellow, 1.5f);
+                foreach (Tile tile in _path)
+                {
+                    spritebatch.DrawCircle(tile.Center, 4, 10, Color.Yellow, 1.5f);
+                }
+
+                spritebatch.DrawCircle(_path.Last.Value.Center, 4, 10, Color.Red, 2.0f);
             }
-            return true;
         }
 
         public bool Move(GameTime gameTime)
         {
-            
             //If there are currently waypoints determined, the crew member will start moving to the next waypoint.
             //The waypoint they move to is always at index 0 in the list.
-            if (_path_waypoints.Count > 0)
+            if (_path.Count > 0)
             {
-                Direction = Vector2.Normalize(_path_waypoints[0] - this.Position);
+                Tile nextTile = _path.First.Value;
+                this.Direction = Vector2.Normalize(nextTile.Center - this.Position);
 
                 Vector2 force = new Vector2(0, 0);
 
-                force += Direction * 600 * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                force += this.Direction * 600 * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                 ApplyForce(force);
                 
-                if (_current_state != (byte)State.Walking)
+                if (_current_state != CrewState.Walking)
                 {
-                    StateChange(State.Walking);
+                    StateChange(CrewState.Walking);
                 }
 
                 //Once a waypoint has been reached, remove it from the list.
                 //The RemoveAt function removes the index specified, and bumps all other indexes up.
-                if (Vector2.Distance(this.Position, _path_waypoints[0]) < _path_waypoint_radius)
+                if (Vector2.Distance(this.Position, nextTile.Center) < WAYPOINT_RADIUS)
                 {
-                    _path_waypoints[0] = this.Position;
-                    _path_waypoints.RemoveAt(0);
-                    
+                    _path.RemoveFirst();                    
                     return true;
                 }
             }
             else
             {
-                if (_current_state != (byte)State.Idle)
+                if (_current_state != CrewState.Idle)
                 {
-                    StateChange(State.Idle);
+                    StateChange(CrewState.Idle);
                     Console.WriteLine(Name + ": ' I have arrived! My energy is now " + _needs.Energy + "'");
                 }
             }
-
-            
-
-            _endTile = new Point((int)Destination.X / Constants.TILE_SIZE, (int)Destination.Y / Constants.TILE_SIZE);
 
             return false;
         }
 
         public bool DeterminePath(LinkedList<Tile> path)
         {
-            Point start_location = new Point((int)Position.X / Constants.TILE_SIZE, (int)Position.Y / Constants.TILE_SIZE);
-            _path = path;
-
-            _path_waypoints.Clear();
             if (_path == null)
             {
+                _path = new LinkedList<Tile>();
+
                 Console.WriteLine("No path found, resetting tiles.");
                 Audio.PlaySoundEffect("low_double_beep");
 
-                _path = new LinkedList<Tile>();
-                _startTile = Point.Zero;
-                _endTile = Point.Zero;
+                return false;
             }
             else
             {
+                _path = path;
+
                 Console.WriteLine(" 'On my way!' ");
                 Audio.PlaySoundEffect("high_double_beep");
-               
-                _waypoint = 0;
-                Destination = new Vector2(path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
-                
-                _startTile = start_location;
-
-                while (_waypoint + 1 < _path.Count)
-                {
-                    _waypoint++;
-
-                    Destination = new Vector2(_path.ElementAt(_waypoint).Position.X * Constants.TILE_SIZE, _path.ElementAt(_waypoint).Position.Y * Constants.TILE_SIZE);
-
-                    _path_waypoints.Add(new Vector2(Destination.X + (Constants.TILE_SIZE / 2), Destination.Y + (Constants.TILE_SIZE / 2)));
-                }
 
                 //Debug
-                Console.WriteLine("There are " + _path_waypoints.Count + " current waypoints calculated on the path.");
-
-                //Node culling.
-                //Store a list of points to remove.
-                List<Vector2> points_to_remove = new List<Vector2>();
-
-                //If the current waypoint is equal to the next waypoints X or Y axis. (Straight above or below, or to the right or left)
-                for (int i = 0; i < _path_waypoints.Count; i++)
-                {
-                    if (_path_waypoints.Count > i + 2)
-                    {
-                        if (_path_waypoints[i].X == _path_waypoints[i + 1].X || _path_waypoints[i].Y == _path_waypoints[i + 1].Y)
-                        {
-                            if (_path_waypoints[i].X == _path_waypoints[i + 2].X || _path_waypoints[i].Y == _path_waypoints[i + 2].Y)
-                            {
-                                points_to_remove.Add(_path_waypoints[i + 1]);
-                            }
-                        }
-                    }
-                }
-
-                bool diagonal_culling = true;
-                sbyte culling_count = 0;
-
-                sbyte directionX = 1;
-                sbyte directionY = 1;
-
-                while (diagonal_culling)
-                {
-                    //Search for every waypoint that matches the waypoint which is diagonal to it, and has another one after it.
-                    for (int i = 0; i < _path_waypoints.Count - 2; i++)
-                    {
-                        if (_path_waypoints[i].X + (Constants.TILE_SIZE * directionX) == _path_waypoints[i + 1].X && _path_waypoints[i].Y + (Constants.TILE_SIZE * directionY) == _path_waypoints[i + 1].Y)
-                        {
-                            if (_path_waypoints[i + 1].X + (Constants.TILE_SIZE * directionX) == _path_waypoints[i + 2].X && _path_waypoints[i + 1].Y + (Constants.TILE_SIZE * directionY) == _path_waypoints[i + 2].Y)
-                            {
-                                points_to_remove.Add(_path_waypoints[i + 1]);
-                            }
-                        }
-                    }
-
-                    culling_count++;
-
-                    //Change the direction each time from NE, NW, SE, SW.
-                    if(culling_count == 1)
-                    {
-                        directionX = -1;
-                        directionY = -1;
-                    }
-                    else if(culling_count == 2)
-                    {
-                        directionX = 1;
-                        directionY = -1;
-                    }
-                    else if (culling_count == 3)
-                    {
-                        directionX = -1;
-                        directionY = 1;
-                    }
-                    if(culling_count == 4)
-                    {
-                        diagonal_culling = false;
-                    }
-                }
-
-                //Remove saved waypoints.
-                while (points_to_remove.Count > 0)
-                {
-                    _path_waypoints.Remove(points_to_remove[0]);
-                    points_to_remove.RemoveAt(0);
-                }
+                Console.WriteLine("There are " + _path.Count + " current waypoints calculated on the path.");
+                return true;
             }
-
-            return true;
-
         }
 
         
@@ -335,41 +220,39 @@ namespace BaseBuilder
         /*This method handles the different states a crew member can be in. More to be added over time.
          * A seperate method for emotional states and other things will be used. This is their physical state.
          */
-        private bool StateChange(State newState)
+        private bool StateChange(CrewState newState)
         {
-            
-            _current_state = (byte)newState;
+            _current_state = newState;
             _current_exertion_rate = GetExertionRate(newState);
 
-            if (newState == State.Idle)
+            if (newState == CrewState.Idle)
             {
                 Console.WriteLine(Name + ": ' I am now idle. '");
                 _activity = "Idle.";
             }
-            else if (newState == State.Walking)
+            else if (newState == CrewState.Walking)
             {
                 Console.WriteLine(Name + ": ' I am now walking! '");
                 _activity = "Walking.";
                 //_activity = "Walking from (" + _startTile.X + "," + _startTile.Y + ") to (" + _endTile.X + "," + _endTile.Y + ")";
             }
-            else if (newState == State.Running)
+            else if (newState == CrewState.Running)
             {
                 Console.WriteLine(Name + ": ' I am now running! '");
-                _activity = "Running from (" + _startTile.X + "," + _startTile.Y + ") to (" + _endTile.X + "," + _endTile.Y + ")";
+                //_activity = "Running from (" + _startTile.X + "," + _startTile.Y + ") to (" + _endTile.X + "," + _endTile.Y + ")";
             }
-            else if (newState == State.Sleeping)
+            else if (newState == CrewState.Sleeping)
             {
                 Console.WriteLine(Name + ": ' Time for bed! Zz. '");
                 _activity = "Sleeping.";
             }
-            else if (newState == State.Building)
+            else if (newState == CrewState.Building)
             {
                 Console.WriteLine(Name + ": ' Building the structure sir! '");
                 _activity = "Constructing...";
             }
 
             return true;
-
         }
 
         private float CalculateHealth(GameTime gameTime)
@@ -457,19 +340,19 @@ namespace BaseBuilder
         /*Assigns the exertion rate for each different state. That is the rate at which the crew member get's tired.
          * Perhaps we could read these values in from a database eventually.
          */
-        private float GetExertionRate(State newState)
+        private float GetExertionRate(CrewState newState)
         {
             switch (newState)
             {
-                case State.Idle:
+                case CrewState.Idle:
                     return -0.1f;
-                case State.Walking:
+                case CrewState.Walking:
                     return -0.3f;
-                case State.Running:
+                case CrewState.Running:
                     return -0.8f;
-                case State.Sleeping:
+                case CrewState.Sleeping:
                     return 1.0f;
-                case State.Building:
+                case CrewState.Building:
                     return -0.5f;
             }
 
@@ -520,18 +403,6 @@ namespace BaseBuilder
             set { _sprite = value; }
         }
 
-        public Point StartTile
-        {
-            get { return _startTile;  }
-            set { _startTile = value;  }
-        }
-
-        public Point EndTile
-        {
-            get { return _endTile; }
-            set { _endTile = value; }
-        }
-
         public LinkedList<Tile> Path
         {
             get { return _path; }
@@ -541,12 +412,6 @@ namespace BaseBuilder
         {
             get { return _activity; }
             set { _activity = value; }
-        }
-
-        public Vector2 Destination
-        {
-            get { return _destination; }
-            set { _destination = value; }
         }
     }
 
@@ -647,4 +512,13 @@ namespace BaseBuilder
             set { _icon = value; }
         }
     }
+
+    public enum CrewState
+    {
+        Idle,
+        Walking,
+        Running,
+        Sleeping,
+        Building
+    };
 }

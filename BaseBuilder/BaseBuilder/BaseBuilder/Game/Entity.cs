@@ -227,6 +227,12 @@ namespace BaseBuilder
         {
             get { return _resistance; }
             set { _resistance = value; }
-        } 
+        }
+
+        public Vector2 Acceleration
+        {
+            get { return _acceleration; }
+            set { _acceleration = value; }
+        }
     }
 }
